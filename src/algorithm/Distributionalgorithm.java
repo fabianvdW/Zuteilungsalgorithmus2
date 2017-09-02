@@ -81,6 +81,9 @@ package algorithm;
 
 import data.Distribution;
 import data.Participant;
+import data.Project;
+
+import java.util.ArrayList;
 
 public class Distributionalgorithm {
     public static Distribution dbDistribution;
@@ -101,8 +104,8 @@ public class Distributionalgorithm {
      * @param participant who is supposed ot be checked for joining the project
      * @return true if able to join and false if not able to join
      */
-    public static boolean isParticipantAllowedOnProject(Participant participant) {
-        return false;
+    public static boolean isParticipantAllowedOnProject(Participant participant, Project project) {
+        return(project.getAllowedClasses().contains(participant.getClassLevel()) && !project.isFull());
     }
 
     /**
@@ -111,6 +114,20 @@ public class Distributionalgorithm {
      * @param d Distribution to be shuffled
      */
     public static void shuffleDistribution(Distribution d) {
-
+        ArrayList<Participant> shuffledParticipants = new ArrayList<Participant>(d.getParticipants().size());
+        ArrayList<Participant> shuffleParticipants = d.getParticipants();
+        ArrayList<Project> shuffledProjects = new ArrayList<Project>(d.getProjects().size());
+        ArrayList<Project> shuffleProjects = d.getProjects();
+        while (shuffleParticipants.size() != 0) {
+            int random = (int)(Math.random() * (shuffledParticipants.size()));
+            shuffledParticipants.add(shuffleParticipants.get(random));
+            shuffleParticipants.remove(random);
+        }
+        while (shuffleProjects.size() != 0){
+            int random = (int)(Math.random() * (shuffledProjects.size()));
+            shuffledProjects.add(shuffleProjects.get(random));
+            shuffleProjects.remove(random);
+        }
     }
 }
+
