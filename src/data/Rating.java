@@ -80,10 +80,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 package data;
 
 public class Rating {
-    /**
-     * Participant who rated
-     */
-    private Participant participant;
+
 
     /**
      * Project which is rated
@@ -96,23 +93,13 @@ public class Rating {
     private int rating;
 
     /**
-     * @param participant participant who rated
+     *
      * @param project     project which is rated
      * @param rating      rating for project of participant who rated
      */
-    Rating(Participant participant, Project project, int rating) {
-        this.participant = participant;
+    public Rating(Project project, int rating) {
         this.project = project;
         this.rating = rating;
-    }
-
-    /**
-     * returns participant who rated
-     *
-     * @return participant who rated
-     */
-    public Participant getP() {
-        return participant;
     }
 
     /**

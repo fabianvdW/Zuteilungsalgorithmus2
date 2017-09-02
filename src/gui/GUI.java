@@ -78,7 +78,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 
  */
 package gui;
-
+import java.util.ArrayList;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
@@ -88,6 +88,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 
 import javax.swing.AbstractAction;
@@ -107,6 +108,11 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 
+import algorithm.Distributionalgorithm;
+import data.Distribution;
+import data.Participant;
+import data.Project;
+import data.Rating;
 import db.DBManager;
 
 public class GUI extends JFrame {
@@ -167,6 +173,7 @@ public class GUI extends JFrame {
         dbm = new DBManager();
         //Algorithmus.Verteilungsalgorithmus.ag = new ArrayList<AG>();
         //Algorithmus.Verteilungsalgorithmus.personen = new ArrayList<Person>();
+        Distributionalgorithm.dbDistribution= new Distribution(new ArrayList<Project>(),new ArrayList<Participant>());
         setTitle("Verteilungsalgorithmus");
         setSize(500, 400);
         setLocationRelativeTo(null);
@@ -202,22 +209,22 @@ public class GUI extends JFrame {
                     } else {
                         showError("Die Datei würde theoretisch jetzt eingelesen werden", "Datei Import");
                         // import needed
-                        /*
+
 				    	String txt = "ID,Name,Mindestanzahl,Höchstanzahl,Teilnehmer" + System.lineSeparator();
-				    	for(AG ag: Algorithmus.Verteilungsalgorithmus.ag){
-				    		txt += ag.getId() + "," + ag.getName() + "," + ag.getMindestanzahl() + "," + ag.getHoechstanzahl() + ",";
-							if(ag.getTeilnehmer()==null){
+				    	for(Project ag: Distributionalgorithm.dbDistribution.getProjects()){
+				    		txt += ag.getID() + "," + ag.getName() + "," + ag.getMinSize() + "," + ag.getMaxSize() + ",";
+							if(ag.getParticipants()==null){
 								txt += ",";
 							}
 							else{
 								int j = 0;
-								for(Person p: ag.getTeilnehmer()){
-									txt += p.getName() + (j++ < ag.getTeilnehmer().size() ? ";" : "");
+								for(Participant p: ag.getParticipants()){
+									txt += p.getName() + (j++ < ag.getParticipants().size() ? ";" : "");
 								}
 							}
 				    		txt += System.lineSeparator();
 				    	}
-				    	RWFile.write(fh, txt);*/
+				    	RWFile.write(fh, txt);
                     }
                 }
             }
@@ -247,20 +254,20 @@ public class GUI extends JFrame {
                         showError("Fehlende Berechtigung zum schreiben auf die ausgewählte Datei", "Zugriff verweigert");
                     } else {
                         String txt = "ID,Name,Mindestanzahl,Höchstanzahl,Teilnehmer" + System.lineSeparator();
-				    	/*for(AG ag: Algorithmus.Verteilungsalgorithmus.ag){
-				    		txt += ag.getId() + "," + ag.getName() + "," + ag.getMindestanzahl() + "," + ag.getHoechstanzahl() + ",";
-							if(ag.getTeilnehmer()==null){
+				    	for(Project ag: Distributionalgorithm.dbDistribution.getProjects()){
+				    		txt += ag.getID() + "," + ag.getName() + "," + ag.getMinSize() + "," + ag.getMaxSize() + ",";
+							if(ag.getParticipants()==null){
 								txt += ",";
 							}
 							else{
 								int j = 0;
-								for(Person p: ag.getTeilnehmer()){
-									txt += p.getName() + (j++ < ag.getTeilnehmer().size() ? ";" : "");
+								for(Participant p: ag.getParticipants()){
+									txt += p.getName() + (j++ < ag.getParticipants().size() ? ";" : "");
 								}
 							}
 				    		txt += System.lineSeparator();
 				    	}
-				    	*/
+
                         RWFile.write(fh, txt);
                     }
                 }
@@ -292,16 +299,16 @@ public class GUI extends JFrame {
                     } else {
                         String txt = "ID,Name,Aktuelle AG,Gewählte AGs" + System.lineSeparator();
                         int j = 0;
-			    		/*
-				    	for(Person p: Algorithmus.Verteilungsalgorithmus.personen){
-				    		txt += p.getId() + "," + p.getName() + "," + p.getBesuchteAG() + ",";
+
+				    	for(Participant p: Distributionalgorithm.dbDistribution.getParticipants()){
+				    		txt += p.getID() + "," + p.getName() + "," + p.getProject() + ",";
 				    		j = 0;
-				    		for(Rating r: p.getRatingAL()){
-				    			txt += r.getAG().getName() + ":" + r.getRatingValue() + (j++ < p.getRatingAL().size() ? ";" : "");
+				    		for(Rating r: p.getRatings()){
+				    			txt += r.getProject().getName() + ":" + r.getRating() + (j++ < p.getRatings().size() ? ";" : "");
 				    		}
 				    		txt += System.lineSeparator();
 				    	}
-				    	*/
+
                         RWFile.write(fh, txt);
                     }
                 }
@@ -322,6 +329,7 @@ public class GUI extends JFrame {
         impDB.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 dbm.initializeJavaObjectsFromDB();
+                //TODO
                 //System.out.println(Verteilungsalgorithmus.statusCheck());
                 showError("Alle Daten wurden vom Server geladen", "Datentransfer abgeschlossen");
                 repaint();
@@ -383,6 +391,7 @@ public class GUI extends JFrame {
         men.add(menItem);
         menItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                //TODO
                 //Test.generiereTestSet();
                 repaint();
             }
@@ -390,13 +399,15 @@ public class GUI extends JFrame {
         menItem = new JMenuItem("Ausführen");
         menItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                //Algorithmus.Verteilungsalgorithmus.verteile(true);
+                Distributionalgorithm.finishDistribution(Distributionalgorithm.dbDistribution);
+                /*//TODO
                 try {
-                    //Test.writeFile(Algorithmus.Verteilungsalgorithmus.log);
+                    Test.writeFile(Algorithmus.Verteilungsalgorithmus.log);
                 } catch (Exception ei) {
                     ei.printStackTrace();
                 }
-                //Algorithmus.Verteilungsalgorithmus.macheAusgabe();
+                */
+                //TODO Distributionalgorithm.printDistribution()
                 showAGList();
             }
         });
@@ -412,12 +423,12 @@ public class GUI extends JFrame {
         add(new JLabel("AGs:"));
         agField = new JTextField();
         agField.setEditable(false);
-        //agField.setText("" + Algorithmus.Verteilungsalgorithmus.ag.size());
+        agField.setText("" + Distributionalgorithm.dbDistribution.getProjects().size());
         add(agField);
         add(new JLabel("Personen:"));
         pField = new JTextField();
         pField.setEditable(false);
-        //pField.setText("" + Algorithmus.Verteilungsalgorithmus.personen.size());
+        pField.setText("" + Distributionalgorithm.dbDistribution.getParticipants().size());
         add(pField);
         setVisible(true);
     }
@@ -527,42 +538,42 @@ public class GUI extends JFrame {
      * Method responsible for showing a list of all projects
      */
     protected void showAGList() {
-		/*String[][] agList = new String[Algorithmus.Verteilungsalgorithmus.ag.size()][5];
+		String[][] agList = new String[Distributionalgorithm.dbDistribution.getProjects().size()][5];
 		int i = 0;
 		String teilnehmer = null;
-		String[] sort = new String[Algorithmus.Verteilungsalgorithmus.ag.size()];
-		for(AG ag: Algorithmus.Verteilungsalgorithmus.ag){
-			sort[i++] = ag.getName() + ag.getId();
+		String[] sort = new String[Distributionalgorithm.dbDistribution.getProjects().size()];
+		for(Project ag: Distributionalgorithm.dbDistribution.getProjects()){
+			sort[i++] = ag.getName() + ag.getID();
 		}
 		Arrays.sort(sort);
 		i = 0;
 		for(String name: sort){
-			for(AG ag: Algorithmus.Verteilungsalgorithmus.ag){
-				if(!name.equals(ag.getName() + ag.getId())){
+			for(Project ag:Distributionalgorithm.dbDistribution.getProjects()){
+				if(!name.equals(ag.getName() + ag.getID())){
 					continue;
 				}
 				agList[i][0] = ag.getName();
-				agList[i][1] = "" + ag.getMindestanzahl();
-				agList[i][2] = "" + ag.getHoechstanzahl();
+				agList[i][1] = "" + ag.getMinSize();
+				agList[i][2] = "" + ag.getMaxSize();
 				String tmp = "";
-				if(ag.getJahrgang()!=null && ag.getJahrgang().isEmpty()){
+				if(ag.getAllowedClasses()!=null && ag.getAllowedClasses().isEmpty()){
 					int n = 0;
-					for(int jahrg: ag.getJahrgang()){
-						tmp += jahrg + (n++<ag.getJahrgang().size() ? ", " : "");
+					for(int jahrg: ag.getAllowedClasses()){
+						tmp += jahrg + (n++<ag.getAllowedClasses().size() ? ", " : "");
 					}
 				}
 				else{
 					tmp = "Alle";
 				}
 				agList[i][3] = tmp;
-				if(ag.getTeilnehmer()==null){
+				if(ag.getParticipants()==null){
 					agList[i][4] = "";
 				}
 				else{
 					teilnehmer = "";
 					int j = 0;
-					for(Person p: ag.getTeilnehmer()){
-						teilnehmer += p.getName() + (j++ < ag.getTeilnehmer().size() ? ", " : "");
+					for(Participant p: ag.getParticipants()){
+						teilnehmer += p.getName() + (j++ < ag.getParticipants().size() ? ", " : "");
 					}
 					agList[i][4] = teilnehmer;
 				}
@@ -571,50 +582,48 @@ public class GUI extends JFrame {
 		}
 		String[] agListHead = new String[]{"Name", "Mindestanzahl", "Höchstanzahl", "Erlaubte Jahrgänge", "Teilnehmer"};
 		showTable(agListHead, agList, "Alle AGs");
-		*/
+
     }
 
     /**
      * Method responsible for showing a list of all participants
      */
     protected void showPersonenList() {
-	    /*
-		String[][] persList = new String[Algorithmus.Verteilungsalgorithmus.personen.size()][6];
+
+		String[][] persList = new String[Distributionalgorithm.dbDistribution.getParticipants().size()][4];
 		int i = 0;
 		String ags = null;
-		String[] sort = new String[Algorithmus.Verteilungsalgorithmus.personen.size()];
-		for(Person p: Algorithmus.Verteilungsalgorithmus.personen){
-			sort[i++] = p.getJahrgang() + p.getKlasse() + p.getName() + p.getId();
+		String[] sort = new String[Distributionalgorithm.dbDistribution.getParticipants().size()];
+		for(Participant p: Distributionalgorithm.dbDistribution.getParticipants()){
+			sort[i++] = p.getClassLevel() + p.getName() + p.getID();
 		}
 		Arrays.sort(sort);
 		i = 0;
 		for(String name: sort){
-			for(Person p: Algorithmus.Verteilungsalgorithmus.personen){
-				if(!name.equals(p.getJahrgang() + p.getKlasse() + p.getName() + p.getId())){
+			for(Participant p: Distributionalgorithm.dbDistribution.getParticipants()){
+				if(!name.equals(p.getClassLevel() + p.getName() + p.getID())){
 					continue;
 				}
-				persList[i][0] = p.getJahrgang() + (p.getKlasse()==null ? "" : p.getKlasse());
+				persList[i][0] = ""+p.getClassLevel();
 				persList[i][1] = p.getName();
-				persList[i][2] = p.getGeschlecht();
-				persList[i][3] = (p.getGeburtsdatum()==null ? "" : p.getGeburtsdatum().toString());
-				persList[i][4] = (p.getBesuchteAG()==null ? "" : "" + p.getBesuchteAG().getName());
-				if(p.getRatingAL()==null){
-					persList[i][5] = "";
+				persList[i][2] = (p.getProject()==null ? "" : "" + p.getProject().getName());
+				if(p.getRatings()==null){
+					persList[i][3] = "";
 				}
 				else{
 					ags = "";
 					int j = 0;
-					for(Rating r: p.getRatingAL()){
-						ags += r.getAG().getName() + ": " + r.getRatingValue() + (j++ < p.getRatingAL().size() ? ", " : "");
+					for(Rating r: p.getRatings()){
+						ags += r.getProject().getName() + ": " + r.getRating() + (j++ < p.getRatings().size() ? ", " : "");
 					}
-					persList[i][5] = ags;
+					persList[i][3] = ags;
 				}
 			}
 			i++;
 		}
-		String[] persListHead = new String[]{"Klasse", "Name", "Geschlecht", "Geburtsdatum", "Aktuelle AG", "Gewählte AGs"};
+		String[] persListHead = new String[]{"Klasse", "Name", "Aktuelle AG", "Gewählte AGs"};
 		showTable(persListHead, persList, "Schüler-Liste");
-		*/
+
     }
 
     /**
@@ -684,8 +693,8 @@ public class GUI extends JFrame {
      */
     public void repaint() {
         isConnField.setText((dbm.isConnected() ? "Ja" : "Nein"));
-        //agField.setText("" + Algorithmus.Verteilungsalgorithmus.ag.size());
-        //pField.setText("" + Algorithmus.Verteilungsalgorithmus.personen.size());
+        agField.setText("" +Distributionalgorithm.dbDistribution.getProjects().size() );
+        pField.setText("" +Distributionalgorithm.dbDistribution.getParticipants().size());
         if (dbm.isConnected()) {
             conDB.setEnabled(false);
             impDB.setEnabled(true);
@@ -705,10 +714,10 @@ public class GUI extends JFrame {
      */
     protected void showAGSelection() {
         JDialog ags = new JDialog(this, "AG zum Anzeigen auswählen", false);
-        //String[] labels = new String[Algorithmus.Verteilungsalgorithmus.ag.size() + 1];
-        //labels[0] = "Alle";
-		/*for(int i = 0; i < Algorithmus.Verteilungsalgorithmus.ag.size(); i++){
-			labels[i + 1] = Algorithmus.Verteilungsalgorithmus.ag.get(i).getName();
+        String[] labels = new String[Distributionalgorithm.dbDistribution.getProjects().size() + 1];
+        labels[0] = "Alle";
+		for(int i = 0; i < Distributionalgorithm.dbDistribution.getProjects().size(); i++){
+			labels[i + 1] = Distributionalgorithm.dbDistribution.getProjects().get(i).getName();
 		}
 	    selectAG = new JComboBox<String>(labels);
 		ags.getContentPane().setLayout(new FlowLayout(FlowLayout.CENTER));
@@ -721,39 +730,37 @@ public class GUI extends JFrame {
 					showAGList();
 				}
 				else{
-					for(AG a: Algorithmus.Verteilungsalgorithmus.ag){
+					for(Project a:Distributionalgorithm.dbDistribution.getProjects()){
 						if(!sel.equals(a.getName())){
 							continue;
 						}
-						String[][] persList = new String[a.getTeilnehmer().size()][6];
+						String[][] persList = new String[a.getParticipants().size()][4];
 						int i = 0;
 						String ags = null;
-						String[] sort = new String[a.getTeilnehmer().size()];
-						for(Person p: a.getTeilnehmer()){
-							sort[i++] = p.getJahrgang() + p.getKlasse() + p.getName() + p.getId();
+						String[] sort = new String[a.getParticipants().size()];
+						for(Participant p: a.getParticipants()){
+							sort[i++] = p.getClassLevel() + p.getName() + p.getID();
 						}
 						Arrays.sort(sort);
 						i = 0;
 						for(String name: sort){
-							for(Person p: a.getTeilnehmer()){
-								if(!name.equals(p.getJahrgang() + p.getKlasse() + p.getName() + p.getId())){
+							for(Participant p: a.getParticipants()){
+								if(!name.equals(p.getClassLevel()  + p.getName() + p.getID())){
 									continue;
 								}
-								persList[i][0] = p.getJahrgang() + (p.getKlasse()==null ? "" : p.getKlasse());
+								persList[i][0] = ""+p.getClassLevel() ;
 								persList[i][1] = p.getName();
-								persList[i][2] = p.getGeschlecht();
-								persList[i][3] = (p.getGeburtsdatum()==null ? "" : p.getGeburtsdatum().toString());
-								persList[i][4] = (p.getBesuchteAG()==null ? "" : "" + p.getBesuchteAG().getName());
-								if(p.getRatingAL()==null){
-									persList[i][5] = "";
+								persList[i][2] = (p.getProject()==null ? "" : "" + p.getProject().getName());
+								if(p.getRatings()==null){
+									persList[i][3] = "";
 								}
 								else{
 									ags = "";
 									int j = 0;
-									for(Rating r: p.getRatingAL()){
-										ags += r.getAG().getName() + ": " + r.getRatingValue() + (j++ < p.getRatingAL().size() ? ", " : "");
+									for(Rating r: p.getRatings()){
+										ags += r.getProject().getName() + ": " + r.getRating() + (j++ < p.getRatings().size() ? ", " : "");
 									}
-									persList[i][5] = ags;
+									persList[i][3] = ags;
 								}
 							}
 							i++;
@@ -764,7 +771,7 @@ public class GUI extends JFrame {
 				}
 			}
 		});
-		*/
+
         //ags.getContentPane().add(button);
         //button = new JButton("Abbrechen");
         //button.addActionListener(new ActionListener(){

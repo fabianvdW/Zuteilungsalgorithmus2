@@ -92,7 +92,7 @@ public class Distribution {
     private ArrayList<Project> projects;
 
     /**
-     * Initializes new Distirbution Object
+     * Initializes new Distribution Object
      *
      * @param projects     Projects to be added to distribution
      * @param participants Participants to be added to distribution
@@ -102,6 +102,21 @@ public class Distribution {
         this.participants = participants;
     }
 
+    /**
+     * Adds participant to distribution
+     * @param participant participant to be added
+     */
+    public void addParticipant(Participant participant){
+        this.participants.add(participant);
+    }
+
+    /**
+     * Adds project to distribution
+     * @param project project to be added
+     */
+    public void addProject(Project project){
+        this.projects.add(project);
+    }
     /**
      * Checks if all participants are allocated
      *
@@ -186,6 +201,29 @@ public class Distribution {
             }
         }
         return notTakingPlace;
+    }
+
+    /**
+     *
+     * @return true if there is enough space for all participants in projects
+     */
+    public boolean isValid(){
+        int amtParticipants= this.participants.size();
+        int amtSpace=0;
+        for(Project p: this.projects){
+            amtSpace+=p.getMaxSize();
+        }
+        return amtSpace>=amtParticipants;
+    }
+
+    /**
+     *
+     * @return String which represents object
+     */
+    @Override
+    public String toString(){
+        //TODO
+        return "";
     }
 
 }

@@ -83,7 +83,7 @@ import data.Distribution;
 import data.Participant;
 
 public class Distributionalgorithm {
-
+    public static Distribution dbDistribution;
     /**
      * Distributes the dataset
      *
@@ -91,9 +91,8 @@ public class Distributionalgorithm {
      * @return distributed dataset
      */
     public static Distribution finishDistribution(Distribution d) {
-        Distribution distribution = d;
         shuffleDistribution(d);
-        return distribution;
+        return d;
     }
 
     /**
@@ -107,7 +106,7 @@ public class Distributionalgorithm {
     }
 
     /**
-     * Shuffles the dataset for the distribution
+     * Shuffles the dataset of the distribution
      *
      * @param d Distribution to be shuffled
      */

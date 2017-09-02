@@ -206,9 +206,11 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import algorithm.Distributionalgorithm;
 import data.Participant;
 import data.Project;
-
+import data.Rating;
 public class DBManager {
     /**
      * @author Agent77326
@@ -253,18 +255,15 @@ public class DBManager {
     public void addParticipant(Participant p) {
         String tmp = "";
         int i = 0;
-        for (Rating n : p.getRatingAL()) {
-            tmp += n.getAG().getId() + (i++ < p.getRatingAL().size() ? "," : "");
+        for (Rating n : p.getRatings()) {
+            tmp += n.getProject().getID() + (i++ < p.getRatings().size() ? "," : "");
         }
         db.query("INSERT INTO `Personen" + profile + "` "
-                + "(`id`, `name`, `ratings`, `curAG`, `jahrgang`, `klasse`, `geschlecht`, `geburtsdatum`) "
-                + "VALUES (" + p.getId() + ", "
+                + "(`id`, `name`, `ratings`, `curAG`, `jahrgang`) "
+                + "VALUES (" + p.getID() + ", "
                 + "'" + p.getName() + "', "
                 + "'" + tmp + "', "
-                + "'" + p.getJahrgang() + "', "
-                + "'" + p.getKlasse() + "', "
-                + "'" + p.getGeschlecht() + "', "
-                + "'" + p.getGeburtsdatum().toString() + "')");
+                + "'" + p.getClassLevel() + "')");
     }
 
     /**
@@ -276,12 +275,12 @@ public class DBManager {
     public void addProject(Project ag) {
         String tmp = "";
         int i = 0;
-        for (Person p : ag.getTeilnehmer()) {
-            tmp += p.getId() + (i++ < ag.getTeilnehmer().size() ? "," : "");
+        for (Participant p : ag.getParticipants()) {
+            tmp += p.getID() + (i++ < ag.getParticipants().size() ? "," : "");
         }
         db.query("INSERT INTO `AG" + profile + "` "
                 + "(`id`, `name`, `minAnzahl`, `maxAnzahl`, `member`) "
-                + "VALUES (NULL, '" + ag.getName() + "', '" + ag.getMindestanzahl() + "', '" + ag.getHoechstanzahl() + "', '" + tmp + "')");
+                + "VALUES (NULL, '" + ag.getName() + "', '" + ag.getMinSize() + "', '" + ag.getMaxSize() + "', '" + tmp + "')");
     }
 
     /**
@@ -332,14 +331,14 @@ public class DBManager {
      */
 
     public Participant getParticipant(int id) {
-        for (Person p : Algorithmus.Verteilungsalgorithmus.personen) {
-            if (p.getId() == id) {
+        for (Participant p : Distributionalgorithm.dbDistribution.getParticipants()) {
+            if (p.getID() == id) {
                 return p;
             }
         }
-        for (AG a : Algorithmus.Verteilungsalgorithmus.ag) {
-            for (Person p : a.getTeilnehmer()) {
-                if (p.getId() == id) {
+        for (Project a : Distributionalgorithm.dbDistribution.getProjects()) {
+            for (Participant p : a.getParticipants()) {
+                if (p.getID() == id) {
                     return p;
                 }
             }
@@ -368,9 +367,9 @@ public class DBManager {
             if (n == null || n.equals("")) {
                 continue;
             }
-            AG ag = null;
-            for (AG agi : Verteilungsalgorithmus.ag) {
-                if (agi.getId() == Integer.parseInt(n.substring(0, 1))) {
+            Project ag = null;
+            for (Project agi : Distributionalgorithm.dbDistribution.getProjects()) {
+                if (agi.getID() == Integer.parseInt(n.substring(0, 1))) {
                     ag = agi;
                 }
             }
@@ -386,15 +385,15 @@ public class DBManager {
             }
 
         }
-        for (AG ag : Verteilungsalgorithmus.ag) {
+        for (Project ag : Distributionalgorithm.dbDistribution.getProjects()) {
             boolean contains = false;
             for (Rating r : rating) {
-                if (r.getAG().equals(ag)) {
+                if (r.getProject().equals(ag)) {
                     contains = true;
                 }
             }
             if (!contains) {
-                if (ag.getJahrgang().contains(jahrgang)) {
+                if (ag.getAllowedClasses().contains(jahrgang)) {
                     rating.add(new Rating(ag, -3));
                 }
             }
@@ -410,7 +409,7 @@ public class DBManager {
         }
 
         // Aktuelle AG
-        AG curAG = null;
+        Project curAG = null;
         int pCurAG = -1;
         for (int i = 0; i < p[1].length; i++) {
             if (p[0][i].equals("curAG")) {
@@ -421,8 +420,8 @@ public class DBManager {
             }
         }
         if (pCurAG != -1) {
-            for (AG a : Algorithmus.Verteilungsalgorithmus.ag) {
-                if (a.getId() == pCurAG) {
+            for (Project a : Distributionalgorithm.dbDistribution.getProjects()) {
+                if (a.getID() == pCurAG) {
                     curAG = a;
                     break;
                 }
@@ -463,7 +462,7 @@ public class DBManager {
         if (jahrgang == 0) {
             classlevel = true;
         }
-        return new Person(id, name, rating, curAG, jahrgang, klasse, geburtsdatum, geschlecht);
+        return new Participant(name,jahrgang,rating);
     }
 
     /**
@@ -482,8 +481,8 @@ public class DBManager {
      * @return project  object
      */
     public Project getProject(int id) {
-        for (AG a : Algorithmus.Verteilungsalgorithmus.ag) {
-            if (a.getId() == id) {
+        for (Project a : Distributionalgorithm.dbDistribution.getProjects()) {
+            if (a.getID() == id) {
                 return a;
             }
         }
@@ -520,7 +519,7 @@ public class DBManager {
         }
 
         // Teilnehmer
-        ArrayList<Person> teilnehmer = new ArrayList<Person>();
+        ArrayList<Participant> teilnehmer = new ArrayList<Participant>();
         int pers = -1;
         for (int i = 0; i < p[1].length; i++) {
             if (p[0][i].equals("erlaubteJahrgang")) {
@@ -535,7 +534,7 @@ public class DBManager {
                 if (n == null || n.equals("")) {
                     continue;
                 }
-                teilnehmer.add(getPerson(Integer.parseInt(n)));
+                teilnehmer.add(getParticipant(Integer.parseInt(n)));
             }
         }
 
@@ -561,7 +560,11 @@ public class DBManager {
         if (jahrgang.size() == 0) {
             classlevel = true;
         }
-        return new AG(id, name, minAnzahl, maxAnzahl, teilnehmer, jahrgang);
+        Project project= new Project(jahrgang,name,minAnzahl,maxAnzahl);
+        for(Participant particpant: teilnehmer){
+            project.addParticipant(particpant);
+        }
+        return project;
     }
 
     /**
@@ -600,7 +603,7 @@ public class DBManager {
             //Algorithmus.Verteilungsalgorithmus.personen.add(getPerson(Integer.parseInt(id[0])));
         }
         try {
-            if (!Verteilungsalgorithmus.checkObDieAGDiePersonenAufnehmenKann()) {
+            if (!Distributionalgorithm.dbDistribution.isValid()) {
                 throw new Exception("Die AGen können diese Anzahl an Personen nicht aufnehmen!");
             }
         } catch (Exception e) {
@@ -608,15 +611,20 @@ public class DBManager {
             lgr.log(Level.WARNING, e.getMessage(), e);
         }
         if (classlevel) {
-            System.out.println("Die Jahrgänge wurden nicht richtig angegeben!");
-            for (Person p : Verteilungsalgorithmus.personen) {
+
+            System.out.println("Die Jahrgänge wurden nicht richtig angegeben!Exit");
+            System.exit(0);
+            /*
+            for (Participant p : Distributionalgorithm.dbDistribution.getParticipants()) {
                 p.setJahrgang(-1);
+                p.setClassLevel
             }
             for (AG ag : Verteilungsalgorithmus.ag) {
                 ag.getJahrgang().clear();
                 ag.addJahrgang(-1);
 
             }
+            */
         }
 
     }
