@@ -298,4 +298,14 @@ public class Project {
     public void setRatings(ArrayList<ArrayList<Participant>> ratings) {
         this.ratings = ratings;
     }
+
+    /**
+     *
+     * @return String describing object
+     */
+    public String toString(){
+        String s="";
+        s+="Name: "+this.name+"\n"+"Min Size: "+this.minSize+"\n" +"Max Size: "+this.maxSize+"\n" +"Amount of Participants allocated: "+this.participants.size()+"\n";
+        return s;
+    }
 }
