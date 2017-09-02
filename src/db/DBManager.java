@@ -212,21 +212,28 @@ public class DBManager {
     /**
      * @author Agent77326
      */
-	private DB db;
-	private boolean klassenstufen;
-	private int profile;
-	
+    /**
+     * Describes classlevel
+     */
+    private boolean classlevel;
 	/**
-	 * Eine Klasse zum Managen der Klasse DB
+	 * database to be connected with class db
+	 */
+	private DB db;
+    /**
+     * profile number for different distributions
+     */
+	private int profile;
+	/**
+	 * A class for managing the class DB
 	 */
 	public DBManager(){
 		profile = 1;
 	}
 	
 	/**
-	 * @param profileNumber Das Profil, das vom Server gelesen werden soll z.B. Unterschiedliche Profile für jedes Jahr -> jedes Jahr neue Tabellen
+	 * @param profileNumber The profile to be read from the server, for example Different profiles for each year -> new tables every year
 	 */
-
 	public DBManager(int profileNumber){
 		profile = profileNumber;
 		if(profile < 1){
@@ -235,14 +242,49 @@ public class DBManager {
 			profile = 1;
 		}
 	}
-	
+    /**
+     * Adds person to db
+     * @param p person to be added
+     */
+    public void addParticipant(Participant p){
+        String tmp = "";
+        int i = 0;
+        for(Rating n: p.getRatingAL()){
+            tmp += n.getAG().getId() + (i++ < p.getRatingAL().size() ? "," : "");
+        }
+        db.query("INSERT INTO `Personen" + profile + "` "
+                + "(`id`, `name`, `ratings`, `curAG`, `jahrgang`, `klasse`, `geschlecht`, `geburtsdatum`) "
+                + "VALUES (" + p.getId() + ", "
+                + "'" + p.getName() + "', "
+                + "'" + tmp + "', "
+                + "'" + p.getJahrgang() + "', "
+                + "'" + p.getKlasse() + "', "
+                + "'" + p.getGeschlecht() + "', "
+                + "'" + p.getGeburtsdatum().toString() + "')");
+    }
+
+    /**
+     * adds Project
+     * @param ag project to be added
+     */
+
+    public void addProject(Project ag){
+        String tmp = "";
+        int i = 0;
+        for(Person p: ag.getTeilnehmer()){
+            tmp += p.getId() + (i++ < ag.getTeilnehmer().size() ? "," : "");
+        }
+        db.query("INSERT INTO `AG" + profile + "` "
+                + "(`id`, `name`, `minAnzahl`, `maxAnzahl`, `member`) "
+                + "VALUES (NULL, '" + ag.getName() + "', '" + ag.getMindestanzahl() + "', '" + ag.getHoechstanzahl() + "', '" + tmp + "')");
+    }
 	/**
-	 * 
+	 * Connectes to a database with class db
 	 * @param server Server URL
 	 * @param port PORT
-	 * @param user Benutzer
+	 * @param user User
 	 * @param password PASSWORD
-	 * @param database Database mit der sich verbunden werden soll
+	 * @param database Database to be connected
 	 */
 	public void connect(String server, int port, String user, String password, String database){
 		db = new DB(server, port, user, password, database);
@@ -267,37 +309,265 @@ public class DBManager {
 	}
 	
 	/**
-	 * Schließt die momentane Verbindung zu einer Datenbank
+	 * Closes current connection to db
 	 */
 	public void close(){
 		if(db!=null){
 			db.close();
 		}
 	}
+    /**
+     * Returns a person object with all data that exists in the database
+     * @param id of participant
+     * @return participant object
+     */
+
+    public Participant getParticipant(int id){
+        for(Person p: Algorithmus.Verteilungsalgorithmus.personen){
+            if(p.getId()==id){
+                return p;
+            }
+        }
+        for(AG a: Algorithmus.Verteilungsalgorithmus.ag){
+            for(Person p: a.getTeilnehmer()){
+                if(p.getId()==id){
+                    return p;
+                }
+            }
+        }
+        String[][] p = db.query("SELECT * FROM `Personen" + profile + "` WHERE `id`='" + id + "'");
+        // Jahrgang
+        int jahrgang = 0;
+        for(int i = 0; i < p[1].length; i++){
+            if(p[0][i].equals("jahrgang")){
+                if(!p[1][i].equals("") && p[1][i] != null){
+                    jahrgang = Integer.parseInt(p[1][i]);
+                }
+                break;
+            }
+        }
+        // get Rating
+        int pRating = -1;
+        for(int i = 0; i < p[1].length; i++){
+            if(p[0][i].equals("ratings")){
+                pRating = i;
+                break;
+            }
+        }
+        ArrayList<Rating> rating = new ArrayList<Rating>();
+        for(String n: p[1][pRating].split(",")){
+            if(n==null || n.equals("")){
+                continue;
+            }
+            AG ag = null;
+            for(AG agi: Verteilungsalgorithmus.ag){
+                if(agi.getId()==Integer.parseInt(n.substring(0,1))){
+                    ag=agi;
+                }
+            }
+            int ratings= Integer.parseInt(n.substring(2));
+            try{
+                if(ratings>3 || ratings<-3){
+                    throw new Exception("Rating liegt nicht im Rahmen!");
+                }
+                rating.add(new Rating(ag,  ratings));
+            }catch(Exception e){
+                Logger lgr = Logger.getLogger(DB.class.getName());
+                lgr.log(Level.WARNING, e.getMessage(),e);
+            }
+
+        }
+        for(AG ag: Verteilungsalgorithmus.ag){
+            boolean contains=false;
+            for(Rating r: rating){
+                if(r.getAG().equals(ag)){
+                    contains=true;
+                }
+            }
+            if(!contains){
+                if(ag.getJahrgang().contains(jahrgang)){
+                    rating.add(new Rating(ag, -3));
+                }
+            }
+        }
+
+        // Name
+        String name = null;
+        for(int i = 0; i < p[1].length; i++){
+            if(p[0][i].equals("name")){
+                name = p[1][i];
+                break;
+            }
+        }
+
+        // Aktuelle AG
+        AG curAG = null;
+        int pCurAG = -1;
+        for(int i = 0; i < p[1].length; i++){
+            if(p[0][i].equals("curAG")){
+                if(!p[1][i].equals("") && p[1][i] != null){
+                    pCurAG = Integer.parseInt(p[1][i]);
+                }
+                break;
+            }
+        }
+        if(pCurAG!=-1){
+            for(AG a: Algorithmus.Verteilungsalgorithmus.ag){
+                if(a.getId()==pCurAG){
+                    curAG = a;
+                    break;
+                }
+            }
+        }
+
+
+
+        // Klasse
+        String klasse = null;
+        for(int i = 0; i < p[1].length; i++){
+            if(p[0][i].equals("klasse")){
+                klasse = p[1][i];
+                break;
+            }
+        }
+
+        // Geburtsdatum
+        Date geburtsdatum = null;
+        for(int i = 0; i < p[1].length; i++){
+            if(p[0][i].equals("geburtsdatum")){
+                if(!p[1][i].equals("") && p[1][i] != null){
+                    geburtsdatum = Date.valueOf(p[1][i]);
+                }
+                break;
+            }
+        }
+
+        // Geschlecht
+        String geschlecht = null;
+        for(int i = 0; i < p[1].length; i++){
+            if(p[0][i].equals("geschlecht")){
+                if(!p[1][i].equals("") && p[1][i] != null){
+                    geschlecht = p[1][i];
+                }
+                break;
+            }
+        }
+        if(jahrgang==0){
+            classlevel=true;
+        }
+        return new Person(id, name, rating, curAG, jahrgang, klasse, geburtsdatum, geschlecht);
+    }
+    /**
+     * Gets current profile
+     * @return Profile-ID
+     */
+    public int getProfile(){
+        return profile;
+    }
+
+    /**
+     * Returns an project object with all data that exists in the DB
+     * @param id ID  of project
+     * @return project  object
+     */
+    public Project getProject(int id){
+        for(AG a: Algorithmus.Verteilungsalgorithmus.ag){
+            if(a.getId()==id){
+                return a;
+            }
+        }
+        String[][] p = db.query("SELECT * FROM `AG" + profile + "` WHERE `id`='" + id + "'");
+        // Name
+        String name = null;
+        for(int i = 0; i < p[1].length; i++){
+            if(p[0][i].equals("name")){
+                name = p[1][i];
+                break;
+            }
+        }
+
+        // Min.-Anzahl
+        int minAnzahl = -1;
+        for(int i = 0; i < p[1].length; i++){
+            if(p[0][i].equals("minAnzahl")){
+                if(!p[1][i].equals("") && p[1][i]!=null){
+                    minAnzahl = Integer.parseInt(p[1][i]);
+                }
+                break;
+            }
+        }
+
+        // Max.-Anzahl
+        int maxAnzahl = -1;
+        for(int i = 0; i < p[1].length; i++){
+            if(p[0][i].equals("maxAnzahl")){
+                if(!p[1][i].equals("") && p[1][i]!=null){
+                    maxAnzahl = Integer.parseInt(p[1][i]);
+                }
+                break;
+            }
+        }
+
+        // Teilnehmer
+        ArrayList<Person> teilnehmer = new ArrayList<Person>();
+        int pers = -1;
+        for(int i = 0; i < p[1].length; i++){
+            if(p[0][i].equals("erlaubteJahrgang")){
+                if(!p[1][i].equals("") && p[1][i]!=null){
+                    pers = i;
+                }
+                break;
+            }
+        }
+        if(pers!=-1){
+            for(String n: p[1][pers].split(",")){
+                if(n==null || n.equals("")){
+                    continue;
+                }
+                teilnehmer.add(getPerson(Integer.parseInt(n)));
+            }
+        }
+
+        // Erlaubte Jahrgänge
+        ArrayList<Integer> jahrgang = new ArrayList<Integer>();
+        int jahrg = -1;
+        for(int i = 0; i < p[1].length; i++){
+            if(p[0][i].equals("erlaubteJahrgang")){
+                if(!p[1][i].equals("") && p[1][i]!=null){
+                    jahrg = i;
+                }
+                break;
+            }
+        }
+        if(jahrg!=-1){
+            for(String n: p[1][jahrg].split(",")){
+                if(n==null || n.equals("")){
+                    continue;
+                }
+                jahrgang.add(Integer.parseInt(n));
+            }
+        }
+        if(jahrgang.size()==0){
+            classlevel=true;
+        }
+        return new AG(id, name, minAnzahl, maxAnzahl, teilnehmer, jahrgang);
+    }
+
+    /**
+     * Returns whether the database is connected or not
+     * @return true if connected to db
+     */
+    public boolean isConnected(){
+        return (db==null ? false : db.isConnected());
+    }
 	
 	/**
-	 * Setze das momentane Profil
-	 * @param profile ProfileID
-	 */
-	public void setProfile(int profile){
-		this.profile = profile;
-	}
-	
-	/**
-	 * Hole das momentane Profile
-	 * @return Profile-ID
-	 */
-	public int getProfile(){
-		return profile;
-	}
-	
-	/**
-	 * Ließt die ganzen Daten einer Datenbank und intitialisiert Java-Objekte
+	 * Reads all the data of a database and initializes Java objects
 	 *
 	 */
 	public void initializeJavaObjectsFromDB(){
-		/*
-		klassenstufen=false;
+
+		classlevel=false;
 		//Algorithmus.Verteilungsalgorithmus.ag = new ArrayList<AG>();
 		//Algorithmus.Verteilungsalgorithmus.personen = new ArrayList<Person>();
 		String[][]ids = db.query("SELECT `id` FROM `AG" + profile + "`");
@@ -326,7 +596,7 @@ public class DBManager {
 			Logger lgr = Logger.getLogger(DB.class.getName());
 			lgr.log(Level.WARNING, e.getMessage(),e);
 		}
-		if(klassenstufen){
+		if(classlevel){
 			System.out.println("Die Jahrgänge wurden nicht richtig angegeben!");
 			for(Person p: Verteilungsalgorithmus.personen){
 				p.setJahrgang(-1);
@@ -337,292 +607,23 @@ public class DBManager {
 		
 			}
 		}
-		*/
+
 	}
 	
 	/**
-	 * speichert alle Daten in der Datenbank
+	 * saves all data into db
 	 */
 	public void saveJavaObjectsToDB(){
-		
+		//not implemented
 	}
-	
-	/**
-	 * Gibt ein Person-Objekt zurück mit allen Daten die es in der DB gibt
-	 * @param id des Schülers
-	 * @return Person das Objekt
-	 */
-	/*
-	public Person getPerson(int id){
-		for(Person p: Algorithmus.Verteilungsalgorithmus.personen){
-			if(p.getId()==id){
-				return p;
-			}
-		}
-		for(AG a: Algorithmus.Verteilungsalgorithmus.ag){
-			for(Person p: a.getTeilnehmer()){
-				if(p.getId()==id){
-					return p;
-				}
-			}
-		}
-		String[][] p = db.query("SELECT * FROM `Personen" + profile + "` WHERE `id`='" + id + "'");
-		// Jahrgang
-				int jahrgang = 0;
-				for(int i = 0; i < p[1].length; i++){
-					if(p[0][i].equals("jahrgang")){
-						if(!p[1][i].equals("") && p[1][i] != null){
-							jahrgang = Integer.parseInt(p[1][i]);
-						}
-						break;
-					}
-				}
-		// get Rating
-		int pRating = -1;
-		for(int i = 0; i < p[1].length; i++){
-			if(p[0][i].equals("ratings")){
-				pRating = i;
-				break;
-			}
-		}
-		ArrayList<Rating> rating = new ArrayList<Rating>();
-		for(String n: p[1][pRating].split(",")){
-			if(n==null || n.equals("")){
-				continue;
-			}
-			AG ag = null;
-			for(AG agi: Verteilungsalgorithmus.ag){
-				if(agi.getId()==Integer.parseInt(n.substring(0,1))){
-					ag=agi;
-				}
-			}
-			int ratings= Integer.parseInt(n.substring(2));
-			try{
-				if(ratings>3 || ratings<-3){
-					throw new Exception("Rating liegt nicht im Rahmen!");
-				}
-				rating.add(new Rating(ag,  ratings));
-			}catch(Exception e){
-				Logger lgr = Logger.getLogger(DB.class.getName());
-				lgr.log(Level.WARNING, e.getMessage(),e);
-			}
-			
-		}
-		for(AG ag: Verteilungsalgorithmus.ag){
-			boolean contains=false;
-			for(Rating r: rating){
-				if(r.getAG().equals(ag)){
-					contains=true;
-				}
-			}
-			if(!contains){
-				if(ag.getJahrgang().contains(jahrgang)){
-					rating.add(new Rating(ag, -3));
-				}
-			}
-		}
-		
-		// Name
-		String name = null;
-		for(int i = 0; i < p[1].length; i++){
-			if(p[0][i].equals("name")){
-				name = p[1][i];
-				break;
-			}
-		}
-		
-		// Aktuelle AG
-		AG curAG = null;
-		int pCurAG = -1;
-		for(int i = 0; i < p[1].length; i++){
-			if(p[0][i].equals("curAG")){
-				if(!p[1][i].equals("") && p[1][i] != null){
-					pCurAG = Integer.parseInt(p[1][i]);
-				}
-				break;
-			}
-		}
-		if(pCurAG!=-1){
-			for(AG a: Algorithmus.Verteilungsalgorithmus.ag){
-				if(a.getId()==pCurAG){
-					curAG = a;
-					break;
-				}
-			}
-		}
-		
-		
-		
-		// Klasse
-		String klasse = null;
-		for(int i = 0; i < p[1].length; i++){
-			if(p[0][i].equals("klasse")){
-				klasse = p[1][i];
-				break;
-			}
-		}
-		
-		// Geburtsdatum
-		Date geburtsdatum = null;
-		for(int i = 0; i < p[1].length; i++){
-			if(p[0][i].equals("geburtsdatum")){
-				if(!p[1][i].equals("") && p[1][i] != null){
-					geburtsdatum = Date.valueOf(p[1][i]);
-				}
-				break;
-			}
-		}
-		
-		// Geschlecht
-		String geschlecht = null;
-		for(int i = 0; i < p[1].length; i++){
-			if(p[0][i].equals("geschlecht")){
-				if(!p[1][i].equals("") && p[1][i] != null){
-					geschlecht = p[1][i];
-				}
-				break;
-			}
-		}
-		if(jahrgang==0){
-			klassenstufen=true;
-		}
-		return new Person(id, name, rating, curAG, jahrgang, klasse, geburtsdatum, geschlecht);
-	}*/
-	
-	/**
-	 * Fügt eine Person in die DB
-	 * @param p die Person die hinzuzufügen ist
-	 */
-	/*
-	public void addPerson(Person p){
-		String tmp = "";
-		int i = 0;
-		for(Rating n: p.getRatingAL()){
-			tmp += n.getAG().getId() + (i++ < p.getRatingAL().size() ? "," : "");
-		}
-		db.query("INSERT INTO `Personen" + profile + "` "
-				+ "(`id`, `name`, `ratings`, `curAG`, `jahrgang`, `klasse`, `geschlecht`, `geburtsdatum`) "
-				+ "VALUES (" + p.getId() + ", "
-				+ "'" + p.getName() + "', "
-				+ "'" + tmp + "', "
-				+ "'" + p.getJahrgang() + "', "
-				+ "'" + p.getKlasse() + "', "
-				+ "'" + p.getGeschlecht() + "', "
-				+ "'" + p.getGeburtsdatum().toString() + "')");
-	}*/
-	
-	/**
-	 * Gibt ein AG-Objekt zurück mit allen Daten die es in der DB gibt
-	 * @param id ID  der AG
-	 * @return AG das Objekt
-	 */
-	/*
-	public AG getAG(int id){
-		for(AG a: Algorithmus.Verteilungsalgorithmus.ag){
-			if(a.getId()==id){
-				return a;
-			}
-		}
-		String[][] p = db.query("SELECT * FROM `AG" + profile + "` WHERE `id`='" + id + "'");
-		// Name
-		String name = null;
-		for(int i = 0; i < p[1].length; i++){
-			if(p[0][i].equals("name")){
-				name = p[1][i];
-				break;
-			}
-		}
-		
-		// Min.-Anzahl
-		int minAnzahl = -1;
-		for(int i = 0; i < p[1].length; i++){
-			if(p[0][i].equals("minAnzahl")){
-				if(!p[1][i].equals("") && p[1][i]!=null){
-					minAnzahl = Integer.parseInt(p[1][i]);
-				}
-				break;
-			}
-		}
-		
-		// Max.-Anzahl
-		int maxAnzahl = -1;
-		for(int i = 0; i < p[1].length; i++){
-			if(p[0][i].equals("maxAnzahl")){
-				if(!p[1][i].equals("") && p[1][i]!=null){
-					maxAnzahl = Integer.parseInt(p[1][i]);
-				}
-				break;
-			}
-		}
-		
-		// Teilnehmer
-		ArrayList<Person> teilnehmer = new ArrayList<Person>();
-		int pers = -1;
-		for(int i = 0; i < p[1].length; i++){
-			if(p[0][i].equals("erlaubteJahrgang")){
-				if(!p[1][i].equals("") && p[1][i]!=null){
-					pers = i;
-				}
-				break;
-			}
-		}
-		if(pers!=-1){
-			for(String n: p[1][pers].split(",")){
-				if(n==null || n.equals("")){
-					continue;
-				}
-				teilnehmer.add(getPerson(Integer.parseInt(n)));
-			}
-		}
-		
-		// Erlaubte Jahrgänge
-		ArrayList<Integer> jahrgang = new ArrayList<Integer>();
-		int jahrg = -1;
-		for(int i = 0; i < p[1].length; i++){
-			if(p[0][i].equals("erlaubteJahrgang")){
-				if(!p[1][i].equals("") && p[1][i]!=null){
-					jahrg = i;
-				}
-				break;
-			}
-		}
-		if(jahrg!=-1){
-			for(String n: p[1][jahrg].split(",")){
-				if(n==null || n.equals("")){
-					continue;
-				}
-				jahrgang.add(Integer.parseInt(n));
-			}
-		}
-		if(jahrgang.size()==0){
-			klassenstufen=true;
-		}
-		return new AG(id, name, minAnzahl, maxAnzahl, teilnehmer, jahrgang);
-	}*/
-	
-	/**
-	 * Fügt eine AG hinzu
-	 * @param ag Die AG die hinzuzufügen ist
-	 */
-	/*
-	public void addAG(AG ag){
-		String tmp = "";
-		int i = 0;
-		for(Person p: ag.getTeilnehmer()){
-			tmp += p.getId() + (i++ < ag.getTeilnehmer().size() ? "," : "");
-		}
-		db.query("INSERT INTO `AG" + profile + "` "
-				+ "(`id`, `name`, `minAnzahl`, `maxAnzahl`, `member`) "
-				+ "VALUES (NULL, '" + ag.getName() + "', '" + ag.getMindestanzahl() + "', '" + ag.getHoechstanzahl() + "', '" + tmp + "')");
-	}
-	*/
-	
-	/**
-	 * Gibt zurück, ob die Datenbank verbunden ist
-	 */
-	public boolean isConnected(){
-		return (db==null ? false : db.isConnected());
-	}
+
+    /**
+     * Sets currentProfile
+     * @param profile ProfileID
+     */
+    public void setProfile(int profile){
+        this.profile = profile;
+    }
 
 }
 
