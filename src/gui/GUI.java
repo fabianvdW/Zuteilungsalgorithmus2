@@ -233,31 +233,57 @@ import javax.swing.KeyStroke;
 import db.DBManager;
 
 public class GUI extends JFrame{
-	// -
+	/**
+	 *  sets serialVersionUID to 1L
+	 */
 	private static final long serialVersionUID = 1L;
-	 
-	// Main-Frame
+
+    /**
+     * Mainframe menu Items
+     */
 	private JMenuItem conDB, impDB, expDB, exDB;
+
+    /**
+     * Mainframe text fields
+     */
 	private JTextField isConnField, agField, pField;
-	
-	// Login-Frame
+
+    /**
+     * Login-frame dialog
+     */
 	private JDialog loginDialog;
+
+    /**
+     * Login-frame text fields
+     */
 	private JTextField loginServerField, loginServerPortField, loginUserField, loginDatabaseField;
+
+    /**
+     * Login-frame password field
+     */
 	private JPasswordField loginPasswordField;
-	
-	// AG-Selection
+
+    /**
+     * Project selection
+     */
 	private JComboBox<String> selectAG;
-	
-	// Database
+
+    /**
+     * Database
+     */
 	private DBManager dbm;
-	
-	
+
+    /**
+     *  Main method
+     * @param args args
+     */
 	public static void main(String[] args){
 		new GUI();
 	}
 	
 	/**
 	 * @author Agent77326
+     * Method responsible for GUI
 	 */
 	protected GUI(){
 		dbm = new DBManager();
@@ -269,7 +295,10 @@ public class GUI extends JFrame{
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 		mainFrame();
 	}
-	
+
+    /**
+     * Method resposible for the main-frame
+     */
 	protected void mainFrame(){
 		getContentPane().removeAll();
 		getContentPane().revalidate();
@@ -519,7 +548,13 @@ public class GUI extends JFrame{
 		add(pField);
 		setVisible(true);
 	}
-	
+
+    /**
+     * Method responsible to show the table
+     * @param colName name for the column
+     * @param data dataset to be shown
+     * @param title title for the table
+     */
 	protected void showTable(String[] colName, String[][] data, String title){
 	    JFrame table = new JFrame();
 		table.setTitle(title);
@@ -536,7 +571,10 @@ public class GUI extends JFrame{
 	    table.pack();
 	    table.setVisible(true);
 	}
-	
+
+    /**
+     * Method responsible for the login
+     */
 	protected void showLogin(){
 		loginDialog = new JDialog(this, "Server Login", true);
 		loginDialog.getContentPane().setLayout(new GridLayout(6,1));
@@ -609,7 +647,10 @@ public class GUI extends JFrame{
 		loginDialog.pack();
 		loginDialog.setVisible(true);
 	}
-	
+
+    /**
+     * Method responsible for showing a list of all projects
+     */
 	protected void showAGList(){
 		/*String[][] agList = new String[Algorithmus.Verteilungsalgorithmus.ag.size()][5];
 		int i = 0;
@@ -657,7 +698,10 @@ public class GUI extends JFrame{
 		showTable(agListHead, agList, "Alle AGs");
 		*/
 	}
-	
+
+    /**
+     * Method responsible for showing a list of all participants
+     */
 	protected void showPersonenList(){
 	    /*
 		String[][] persList = new String[Algorithmus.Verteilungsalgorithmus.personen.size()][6];
@@ -697,7 +741,12 @@ public class GUI extends JFrame{
 		showTable(persListHead, persList, "Schüler-Liste");
 		*/
 	}
-	
+
+    /**
+     * Method responsible for error reports
+     * @param msg Message to be shown
+     * @param title of the shown message
+     */
 	protected void showError(String msg, String title){
 		JDialog error = new JDialog(this, title, true);
 	    error.setSize(300, 120);
@@ -732,7 +781,15 @@ public class GUI extends JFrame{
 	    error.pack();
 	    error.setVisible(true);
 	}
-	
+
+    /**
+     * Method responsible for connecting to the server
+     * @param server Server as String
+     * @param port Port number as int
+     * @param user Username as string
+     * @param password Password as string
+     * @param database Database as string
+     */
 	protected void connect(String server, int port, String user, String password, String database){
 		dbm.connect(server, port, user, password, database);
 		if(dbm.isConnected()){
@@ -743,7 +800,10 @@ public class GUI extends JFrame{
 			showError("Es konnte keine Verbindung zur Datenbank hergestellt werden", "Verbindungsfehler");
 		}
 	}
-	
+
+    /**
+     * Method responsible for repainting
+     */
 	public void repaint(){
 		isConnField.setText((dbm.isConnected() ? "Ja": "Nein"));
 		//agField.setText("" + Algorithmus.Verteilungsalgorithmus.ag.size());
@@ -762,7 +822,10 @@ public class GUI extends JFrame{
 		}
 		super.repaint();
 	}
-	
+
+    /**
+     * Method responsible for showing project selection
+     */
 	protected void showAGSelection(){
 		JDialog ags = new JDialog(this, "AG zum Anzeigen auswählen", false);
 		//String[] labels = new String[Algorithmus.Verteilungsalgorithmus.ag.size() + 1];
@@ -838,8 +901,13 @@ public class GUI extends JFrame{
 		ags.setLocationRelativeTo(null);
 		ags.setVisible(true);
 	}
-	
+
+
 	protected class LoginButtonHandler implements ActionListener{
+        /**
+         * Action listener for login-button
+         * @param e Action event
+         */
 		public void actionPerformed(ActionEvent e){
 			String error = null;
 			try{
@@ -883,6 +951,10 @@ public class GUI extends JFrame{
 	}
 	
 	protected class ExitButtonHandler implements ActionListener{
+        /**
+         * Action listener for exit-button
+         * @param e Action event
+         */
 		public void actionPerformed(ActionEvent e){
 			System.exit(0);
 		}
