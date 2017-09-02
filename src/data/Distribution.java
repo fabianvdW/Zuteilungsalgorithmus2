@@ -233,7 +233,7 @@ public class Distribution {
     }
 
     /**
-     *
+     * To String
      * @return String which represents object
      */
     @Override
