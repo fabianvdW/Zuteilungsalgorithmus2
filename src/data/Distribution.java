@@ -217,7 +217,23 @@ public class Distribution {
     }
 
     /**
-     *
+     * Sets the Arraylist participants
+     * @param participants Arraylist with participants
+     */
+    public void setParticipants(ArrayList<Participant> participants){
+        this.participants = participants;
+    }
+
+    /**
+     * Sets the Arraylist projects
+     * @param projects Arraylist with projects
+     */
+    public void setProjects(ArrayList<Project> projects){
+        this.projects = projects;
+    }
+
+    /**
+     * To String
      * @return String which represents object
      */
     @Override
