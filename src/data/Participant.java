@@ -4,18 +4,33 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 public class Participant {
-    private Project attendsProject;
+    /**
+     * attended project
+     */
+    private Project project;
+    /**
+     * class Level of the participant
+     */
     private int classLevel;
+    /**
+     * unique id of the participant
+     */
     private static int idCount;
+    /**
+     * non-unique name of the participant
+     */
     private String name;
+    /**
+     * Arraylist with the ratings of the participant for all the projects
+     */
     private ArrayList<Rating> ratings;
 
 
     /**
      * Constructs participant with non-random name, class level and an arraylist with ratings for the projects
-     * @param name
-     * @param classLevel
-     * @param ratings
+     * @param name Name of the participant
+     * @param classLevel class level of the participant
+     * @param ratings ratings of the participant for the projects
      */
     public Participant(String name, int classLevel, ArrayList<Rating> ratings) {
         this.name = name;
@@ -25,8 +40,8 @@ public class Participant {
 
     /**
      * Constructs participant with random name, class level and an arraylist with ratings for the projects
-     * @param classLevel
-     * @param ratings
+     * @param classLevel class level of the participant
+     * @param ratings ratings of the participant for the projects
      */
     public Participant(int classLevel, ArrayList<Rating> ratings){
         name = UUID.randomUUID().toString();
@@ -35,10 +50,10 @@ public class Participant {
     }
 
     /**
-     * {@link Participant#attendsProject}
+     * {@link Participant#project}
      */
-    public Project getAllocatedProject() {
-        return attendsProject;
+    public Project getProject() {
+        return project;
     }
 
     /**
@@ -56,15 +71,7 @@ public class Participant {
     }
 
     /**
-     * Allocates the Participant to specified project p
-     * @param p
-     */
-    public void setProject(Project p){
-        attendsProject = p;
-    }
-
-    /**
-     * @param rating
+     * @param rating ratings of the participant for the projects
      * @return all projects participant voted for with specified rating
      */
     public Project getProjectWithRating(int rating){
@@ -83,7 +90,7 @@ public class Participant {
     }
 
     /**
-     * @param p
+     * @param p specified project from which you want to get to know the rating
      * @return Rating for specified p Project
      */
     public int getRating(Project p){
@@ -107,5 +114,13 @@ public class Participant {
      */
     public ArrayList<Rating> getRatings() {
         return ratings;
+    }
+
+    /**
+     * Allocates the Participant to specified project p
+     * @param p project you want to set for the participant
+     */
+    public void setProject(Project p){
+        project = p;
     }
 }
