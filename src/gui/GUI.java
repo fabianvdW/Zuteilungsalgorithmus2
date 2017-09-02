@@ -407,7 +407,8 @@ public class GUI extends JFrame {
                     ei.printStackTrace();
                 }
                 */
-                //TODO Distributionalgorithm.printDistribution()
+                //
+                System.out.println(Distributionalgorithm.dbDistribution.toString());
                 showAGList();
             }
         });
