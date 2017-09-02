@@ -206,7 +206,8 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import data.Participant;
+import data.Project;
 
 public class DBManager {
     /**
@@ -216,40 +217,43 @@ public class DBManager {
      * Describes classlevel
      */
     private boolean classlevel;
-	/**
-	 * database to be connected with class db
-	 */
-	private DB db;
+    /**
+     * database to be connected with class db
+     */
+    private DB db;
     /**
      * profile number for different distributions
      */
-	private int profile;
-	/**
-	 * A class for managing the class DB
-	 */
-	public DBManager(){
-		profile = 1;
-	}
-	
-	/**
-	 * @param profileNumber The profile to be read from the server, for example Different profiles for each year -> new tables every year
-	 */
-	public DBManager(int profileNumber){
-		profile = profileNumber;
-		if(profile < 1){
-			Logger lgr = Logger.getLogger(DBManager.class.getName());
-			lgr.log(Level.SEVERE, "Given Profile-ID is invalid, using default");
-			profile = 1;
-		}
-	}
+    private int profile;
+
+    /**
+     * A class for managing the class DB
+     */
+    public DBManager() {
+        profile = 1;
+    }
+
+    /**
+     * @param profileNumber The profile to be read from the server, for example Different profiles for each year - new tables every year
+     */
+    public DBManager(int profileNumber) {
+        profile = profileNumber;
+        if (profile < 1) {
+            Logger lgr = Logger.getLogger(DBManager.class.getName());
+            lgr.log(Level.SEVERE, "Given Profile-ID is invalid, using default");
+            profile = 1;
+        }
+    }
+
     /**
      * Adds person to db
+     *
      * @param p person to be added
      */
-    public void addParticipant(Participant p){
+    public void addParticipant(Participant p) {
         String tmp = "";
         int i = 0;
-        for(Rating n: p.getRatingAL()){
+        for (Rating n : p.getRatingAL()) {
             tmp += n.getAG().getId() + (i++ < p.getRatingAL().size() ? "," : "");
         }
         db.query("INSERT INTO `Personen" + profile + "` "
@@ -265,72 +269,77 @@ public class DBManager {
 
     /**
      * adds Project
+     *
      * @param ag project to be added
      */
 
-    public void addProject(Project ag){
+    public void addProject(Project ag) {
         String tmp = "";
         int i = 0;
-        for(Person p: ag.getTeilnehmer()){
+        for (Person p : ag.getTeilnehmer()) {
             tmp += p.getId() + (i++ < ag.getTeilnehmer().size() ? "," : "");
         }
         db.query("INSERT INTO `AG" + profile + "` "
                 + "(`id`, `name`, `minAnzahl`, `maxAnzahl`, `member`) "
                 + "VALUES (NULL, '" + ag.getName() + "', '" + ag.getMindestanzahl() + "', '" + ag.getHoechstanzahl() + "', '" + tmp + "')");
     }
-	/**
-	 * Connectes to a database with class db
-	 * @param server Server URL
-	 * @param port PORT
-	 * @param user User
-	 * @param password PASSWORD
-	 * @param database Database to be connected
-	 */
-	public void connect(String server, int port, String user, String password, String database){
-		db = new DB(server, port, user, password, database);
-		db.update("CREATE TABLE IF NOT EXISTS `" + database + "`.`Personen" + profile + "`"
-				+ "( `id` INT NOT NULL AUTO_INCREMENT ,"
-				+ " `name` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'Name des Schülers' ,"
-				+ " `ratings` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin NULL COMMENT 'Wahl der AGs mit Wertung' ,"
-				+ " `curAG` INT NULL COMMENT 'Aktuelle AG' ,"
-				+ " `jahrgang` INT NULL COMMENT 'Jahrgangsstufe des Schülers' ,"
-				+ " `klasse` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin NULL COMMENT 'Klasse des Schülers' ,"
-				+ " `geschlecht` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin NULL COMMENT 'Geschlecht des Schülers' ,"
-				+ " `geburtsdatum` date NULL COMMENT 'Geburtsdatum des Schülers' ,"
-				+ " PRIMARY KEY (`id`)) ENGINE = InnoDB");
-		db.update("CREATE TABLE IF NOT EXISTS`" + database + "`.`AG" + profile + "` "
-				+ "( `id` INT NOT NULL AUTO_INCREMENT , "
-				+ "`name` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'Name der AG' , "
-				+ "`minAnzahl` INT NOT NULL COMMENT 'Mindest-Anzahl der Teilnehmer' , "
-				+ "`maxAnzahl` INT NOT NULL COMMENT 'Maximale-Anzahl der Teilnehmer' , "
-				+ "`erlaubteJahrgang` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'Erlaubte Jahrgänge' , "
-				+ "`member` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'Schüler die an dieser AG teilnehmen' , "
-				+ "PRIMARY KEY (`id`)) ENGINE = InnoDB");
-	}
-	
-	/**
-	 * Closes current connection to db
-	 */
-	public void close(){
-		if(db!=null){
-			db.close();
-		}
-	}
+
+    /**
+     * Connectes to a database with class db
+     *
+     * @param server   Server URL
+     * @param port     PORT
+     * @param user     User
+     * @param password PASSWORD
+     * @param database Database to be connected
+     */
+    public void connect(String server, int port, String user, String password, String database) {
+        db = new DB(server, port, user, password, database);
+        db.update("CREATE TABLE IF NOT EXISTS `" + database + "`.`Personen" + profile + "`"
+                + "( `id` INT NOT NULL AUTO_INCREMENT ,"
+                + " `name` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'Name des Schülers' ,"
+                + " `ratings` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin NULL COMMENT 'Wahl der AGs mit Wertung' ,"
+                + " `curAG` INT NULL COMMENT 'Aktuelle AG' ,"
+                + " `jahrgang` INT NULL COMMENT 'Jahrgangsstufe des Schülers' ,"
+                + " `klasse` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin NULL COMMENT 'Klasse des Schülers' ,"
+                + " `geschlecht` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin NULL COMMENT 'Geschlecht des Schülers' ,"
+                + " `geburtsdatum` date NULL COMMENT 'Geburtsdatum des Schülers' ,"
+                + " PRIMARY KEY (`id`)) ENGINE = InnoDB");
+        db.update("CREATE TABLE IF NOT EXISTS`" + database + "`.`AG" + profile + "` "
+                + "( `id` INT NOT NULL AUTO_INCREMENT , "
+                + "`name` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'Name der AG' , "
+                + "`minAnzahl` INT NOT NULL COMMENT 'Mindest-Anzahl der Teilnehmer' , "
+                + "`maxAnzahl` INT NOT NULL COMMENT 'Maximale-Anzahl der Teilnehmer' , "
+                + "`erlaubteJahrgang` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'Erlaubte Jahrgänge' , "
+                + "`member` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'Schüler die an dieser AG teilnehmen' , "
+                + "PRIMARY KEY (`id`)) ENGINE = InnoDB");
+    }
+
+    /**
+     * Closes current connection to db
+     */
+    public void close() {
+        if (db != null) {
+            db.close();
+        }
+    }
+
     /**
      * Returns a person object with all data that exists in the database
+     *
      * @param id of participant
      * @return participant object
      */
 
-    public Participant getParticipant(int id){
-        for(Person p: Algorithmus.Verteilungsalgorithmus.personen){
-            if(p.getId()==id){
+    public Participant getParticipant(int id) {
+        for (Person p : Algorithmus.Verteilungsalgorithmus.personen) {
+            if (p.getId() == id) {
                 return p;
             }
         }
-        for(AG a: Algorithmus.Verteilungsalgorithmus.ag){
-            for(Person p: a.getTeilnehmer()){
-                if(p.getId()==id){
+        for (AG a : Algorithmus.Verteilungsalgorithmus.ag) {
+            for (Person p : a.getTeilnehmer()) {
+                if (p.getId() == id) {
                     return p;
                 }
             }
@@ -338,9 +347,9 @@ public class DBManager {
         String[][] p = db.query("SELECT * FROM `Personen" + profile + "` WHERE `id`='" + id + "'");
         // Jahrgang
         int jahrgang = 0;
-        for(int i = 0; i < p[1].length; i++){
-            if(p[0][i].equals("jahrgang")){
-                if(!p[1][i].equals("") && p[1][i] != null){
+        for (int i = 0; i < p[1].length; i++) {
+            if (p[0][i].equals("jahrgang")) {
+                if (!p[1][i].equals("") && p[1][i] != null) {
                     jahrgang = Integer.parseInt(p[1][i]);
                 }
                 break;
@@ -348,44 +357,44 @@ public class DBManager {
         }
         // get Rating
         int pRating = -1;
-        for(int i = 0; i < p[1].length; i++){
-            if(p[0][i].equals("ratings")){
+        for (int i = 0; i < p[1].length; i++) {
+            if (p[0][i].equals("ratings")) {
                 pRating = i;
                 break;
             }
         }
         ArrayList<Rating> rating = new ArrayList<Rating>();
-        for(String n: p[1][pRating].split(",")){
-            if(n==null || n.equals("")){
+        for (String n : p[1][pRating].split(",")) {
+            if (n == null || n.equals("")) {
                 continue;
             }
             AG ag = null;
-            for(AG agi: Verteilungsalgorithmus.ag){
-                if(agi.getId()==Integer.parseInt(n.substring(0,1))){
-                    ag=agi;
+            for (AG agi : Verteilungsalgorithmus.ag) {
+                if (agi.getId() == Integer.parseInt(n.substring(0, 1))) {
+                    ag = agi;
                 }
             }
-            int ratings= Integer.parseInt(n.substring(2));
-            try{
-                if(ratings>3 || ratings<-3){
+            int ratings = Integer.parseInt(n.substring(2));
+            try {
+                if (ratings > 3 || ratings < -3) {
                     throw new Exception("Rating liegt nicht im Rahmen!");
                 }
-                rating.add(new Rating(ag,  ratings));
-            }catch(Exception e){
+                rating.add(new Rating(ag, ratings));
+            } catch (Exception e) {
                 Logger lgr = Logger.getLogger(DB.class.getName());
-                lgr.log(Level.WARNING, e.getMessage(),e);
+                lgr.log(Level.WARNING, e.getMessage(), e);
             }
 
         }
-        for(AG ag: Verteilungsalgorithmus.ag){
-            boolean contains=false;
-            for(Rating r: rating){
-                if(r.getAG().equals(ag)){
-                    contains=true;
+        for (AG ag : Verteilungsalgorithmus.ag) {
+            boolean contains = false;
+            for (Rating r : rating) {
+                if (r.getAG().equals(ag)) {
+                    contains = true;
                 }
             }
-            if(!contains){
-                if(ag.getJahrgang().contains(jahrgang)){
+            if (!contains) {
+                if (ag.getJahrgang().contains(jahrgang)) {
                     rating.add(new Rating(ag, -3));
                 }
             }
@@ -393,8 +402,8 @@ public class DBManager {
 
         // Name
         String name = null;
-        for(int i = 0; i < p[1].length; i++){
-            if(p[0][i].equals("name")){
+        for (int i = 0; i < p[1].length; i++) {
+            if (p[0][i].equals("name")) {
                 name = p[1][i];
                 break;
             }
@@ -403,17 +412,17 @@ public class DBManager {
         // Aktuelle AG
         AG curAG = null;
         int pCurAG = -1;
-        for(int i = 0; i < p[1].length; i++){
-            if(p[0][i].equals("curAG")){
-                if(!p[1][i].equals("") && p[1][i] != null){
+        for (int i = 0; i < p[1].length; i++) {
+            if (p[0][i].equals("curAG")) {
+                if (!p[1][i].equals("") && p[1][i] != null) {
                     pCurAG = Integer.parseInt(p[1][i]);
                 }
                 break;
             }
         }
-        if(pCurAG!=-1){
-            for(AG a: Algorithmus.Verteilungsalgorithmus.ag){
-                if(a.getId()==pCurAG){
+        if (pCurAG != -1) {
+            for (AG a : Algorithmus.Verteilungsalgorithmus.ag) {
+                if (a.getId() == pCurAG) {
                     curAG = a;
                     break;
                 }
@@ -421,11 +430,10 @@ public class DBManager {
         }
 
 
-
         // Klasse
         String klasse = null;
-        for(int i = 0; i < p[1].length; i++){
-            if(p[0][i].equals("klasse")){
+        for (int i = 0; i < p[1].length; i++) {
+            if (p[0][i].equals("klasse")) {
                 klasse = p[1][i];
                 break;
             }
@@ -433,9 +441,9 @@ public class DBManager {
 
         // Geburtsdatum
         Date geburtsdatum = null;
-        for(int i = 0; i < p[1].length; i++){
-            if(p[0][i].equals("geburtsdatum")){
-                if(!p[1][i].equals("") && p[1][i] != null){
+        for (int i = 0; i < p[1].length; i++) {
+            if (p[0][i].equals("geburtsdatum")) {
+                if (!p[1][i].equals("") && p[1][i] != null) {
                     geburtsdatum = Date.valueOf(p[1][i]);
                 }
                 break;
@@ -444,43 +452,46 @@ public class DBManager {
 
         // Geschlecht
         String geschlecht = null;
-        for(int i = 0; i < p[1].length; i++){
-            if(p[0][i].equals("geschlecht")){
-                if(!p[1][i].equals("") && p[1][i] != null){
+        for (int i = 0; i < p[1].length; i++) {
+            if (p[0][i].equals("geschlecht")) {
+                if (!p[1][i].equals("") && p[1][i] != null) {
                     geschlecht = p[1][i];
                 }
                 break;
             }
         }
-        if(jahrgang==0){
-            classlevel=true;
+        if (jahrgang == 0) {
+            classlevel = true;
         }
         return new Person(id, name, rating, curAG, jahrgang, klasse, geburtsdatum, geschlecht);
     }
+
     /**
      * Gets current profile
+     *
      * @return Profile-ID
      */
-    public int getProfile(){
+    public int getProfile() {
         return profile;
     }
 
     /**
      * Returns an project object with all data that exists in the DB
+     *
      * @param id ID  of project
      * @return project  object
      */
-    public Project getProject(int id){
-        for(AG a: Algorithmus.Verteilungsalgorithmus.ag){
-            if(a.getId()==id){
+    public Project getProject(int id) {
+        for (AG a : Algorithmus.Verteilungsalgorithmus.ag) {
+            if (a.getId() == id) {
                 return a;
             }
         }
         String[][] p = db.query("SELECT * FROM `AG" + profile + "` WHERE `id`='" + id + "'");
         // Name
         String name = null;
-        for(int i = 0; i < p[1].length; i++){
-            if(p[0][i].equals("name")){
+        for (int i = 0; i < p[1].length; i++) {
+            if (p[0][i].equals("name")) {
                 name = p[1][i];
                 break;
             }
@@ -488,9 +499,9 @@ public class DBManager {
 
         // Min.-Anzahl
         int minAnzahl = -1;
-        for(int i = 0; i < p[1].length; i++){
-            if(p[0][i].equals("minAnzahl")){
-                if(!p[1][i].equals("") && p[1][i]!=null){
+        for (int i = 0; i < p[1].length; i++) {
+            if (p[0][i].equals("minAnzahl")) {
+                if (!p[1][i].equals("") && p[1][i] != null) {
                     minAnzahl = Integer.parseInt(p[1][i]);
                 }
                 break;
@@ -499,9 +510,9 @@ public class DBManager {
 
         // Max.-Anzahl
         int maxAnzahl = -1;
-        for(int i = 0; i < p[1].length; i++){
-            if(p[0][i].equals("maxAnzahl")){
-                if(!p[1][i].equals("") && p[1][i]!=null){
+        for (int i = 0; i < p[1].length; i++) {
+            if (p[0][i].equals("maxAnzahl")) {
+                if (!p[1][i].equals("") && p[1][i] != null) {
                     maxAnzahl = Integer.parseInt(p[1][i]);
                 }
                 break;
@@ -511,17 +522,17 @@ public class DBManager {
         // Teilnehmer
         ArrayList<Person> teilnehmer = new ArrayList<Person>();
         int pers = -1;
-        for(int i = 0; i < p[1].length; i++){
-            if(p[0][i].equals("erlaubteJahrgang")){
-                if(!p[1][i].equals("") && p[1][i]!=null){
+        for (int i = 0; i < p[1].length; i++) {
+            if (p[0][i].equals("erlaubteJahrgang")) {
+                if (!p[1][i].equals("") && p[1][i] != null) {
                     pers = i;
                 }
                 break;
             }
         }
-        if(pers!=-1){
-            for(String n: p[1][pers].split(",")){
-                if(n==null || n.equals("")){
+        if (pers != -1) {
+            for (String n : p[1][pers].split(",")) {
+                if (n == null || n.equals("")) {
                     continue;
                 }
                 teilnehmer.add(getPerson(Integer.parseInt(n)));
@@ -531,97 +542,98 @@ public class DBManager {
         // Erlaubte Jahrgänge
         ArrayList<Integer> jahrgang = new ArrayList<Integer>();
         int jahrg = -1;
-        for(int i = 0; i < p[1].length; i++){
-            if(p[0][i].equals("erlaubteJahrgang")){
-                if(!p[1][i].equals("") && p[1][i]!=null){
+        for (int i = 0; i < p[1].length; i++) {
+            if (p[0][i].equals("erlaubteJahrgang")) {
+                if (!p[1][i].equals("") && p[1][i] != null) {
                     jahrg = i;
                 }
                 break;
             }
         }
-        if(jahrg!=-1){
-            for(String n: p[1][jahrg].split(",")){
-                if(n==null || n.equals("")){
+        if (jahrg != -1) {
+            for (String n : p[1][jahrg].split(",")) {
+                if (n == null || n.equals("")) {
                     continue;
                 }
                 jahrgang.add(Integer.parseInt(n));
             }
         }
-        if(jahrgang.size()==0){
-            classlevel=true;
+        if (jahrgang.size() == 0) {
+            classlevel = true;
         }
         return new AG(id, name, minAnzahl, maxAnzahl, teilnehmer, jahrgang);
     }
 
     /**
      * Returns whether the database is connected or not
+     *
      * @return true if connected to db
      */
-    public boolean isConnected(){
-        return (db==null ? false : db.isConnected());
+    public boolean isConnected() {
+        return (db == null ? false : db.isConnected());
     }
-	
-	/**
-	 * Reads all the data of a database and initializes Java objects
-	 *
-	 */
-	public void initializeJavaObjectsFromDB(){
 
-		classlevel=false;
-		//Algorithmus.Verteilungsalgorithmus.ag = new ArrayList<AG>();
-		//Algorithmus.Verteilungsalgorithmus.personen = new ArrayList<Person>();
-		String[][]ids = db.query("SELECT `id` FROM `AG" + profile + "`");
-		boolean first = true;
-		for(String[] id: ids){
-			if(first || id[0]==null || id[0].equals("")){
-				first = false;
-				continue;
-			}
-			//Algorithmus.Verteilungsalgorithmus.ag.add(getAG(Integer.parseInt(id[0])));
-		}
-		ids = db.query("SELECT `id` FROM `Personen" + profile + "`");
-		first = true;
-		for(String[] id: ids){
-			if(first || id[0]==null || id[0].equals("")){
-				first = false;
-				continue;
-			}
-			//Algorithmus.Verteilungsalgorithmus.personen.add(getPerson(Integer.parseInt(id[0])));
-		}
-		try{
-			if(!Verteilungsalgorithmus.checkObDieAGDiePersonenAufnehmenKann()){
-				throw new Exception("Die AGen können diese Anzahl an Personen nicht aufnehmen!");
-			}
-		}catch(Exception e){
-			Logger lgr = Logger.getLogger(DB.class.getName());
-			lgr.log(Level.WARNING, e.getMessage(),e);
-		}
-		if(classlevel){
-			System.out.println("Die Jahrgänge wurden nicht richtig angegeben!");
-			for(Person p: Verteilungsalgorithmus.personen){
-				p.setJahrgang(-1);
-			}
-			for(AG ag: Verteilungsalgorithmus.ag){
-				ag.getJahrgang().clear();
-				ag.addJahrgang(-1);
-		
-			}
-		}
+    /**
+     * Reads all the data of a database and initializes Java objects
+     */
+    public void initializeJavaObjectsFromDB() {
 
-	}
-	
-	/**
-	 * saves all data into db
-	 */
-	public void saveJavaObjectsToDB(){
-		//not implemented
-	}
+        classlevel = false;
+        //Algorithmus.Verteilungsalgorithmus.ag = new ArrayList<AG>();
+        //Algorithmus.Verteilungsalgorithmus.personen = new ArrayList<Person>();
+        String[][] ids = db.query("SELECT `id` FROM `AG" + profile + "`");
+        boolean first = true;
+        for (String[] id : ids) {
+            if (first || id[0] == null || id[0].equals("")) {
+                first = false;
+                continue;
+            }
+            //Algorithmus.Verteilungsalgorithmus.ag.add(getAG(Integer.parseInt(id[0])));
+        }
+        ids = db.query("SELECT `id` FROM `Personen" + profile + "`");
+        first = true;
+        for (String[] id : ids) {
+            if (first || id[0] == null || id[0].equals("")) {
+                first = false;
+                continue;
+            }
+            //Algorithmus.Verteilungsalgorithmus.personen.add(getPerson(Integer.parseInt(id[0])));
+        }
+        try {
+            if (!Verteilungsalgorithmus.checkObDieAGDiePersonenAufnehmenKann()) {
+                throw new Exception("Die AGen können diese Anzahl an Personen nicht aufnehmen!");
+            }
+        } catch (Exception e) {
+            Logger lgr = Logger.getLogger(DB.class.getName());
+            lgr.log(Level.WARNING, e.getMessage(), e);
+        }
+        if (classlevel) {
+            System.out.println("Die Jahrgänge wurden nicht richtig angegeben!");
+            for (Person p : Verteilungsalgorithmus.personen) {
+                p.setJahrgang(-1);
+            }
+            for (AG ag : Verteilungsalgorithmus.ag) {
+                ag.getJahrgang().clear();
+                ag.addJahrgang(-1);
+
+            }
+        }
+
+    }
+
+    /**
+     * saves all data into db
+     */
+    public void saveJavaObjectsToDB() {
+        //not implemented
+    }
 
     /**
      * Sets currentProfile
+     *
      * @param profile ProfileID
      */
-    public void setProfile(int profile){
+    public void setProfile(int profile) {
         this.profile = profile;
     }
 
