@@ -145,23 +145,7 @@ public class Distribution {
         return true;
     }
 
-    /**
-     * Calculates the score of a Distribution. This score represents how good the distributionalgorithm did on the distribution.
-     * The perfect score is 0 and every score higher than 0 is worse than the perfect score.
-     *
-     * @return the score of the distribution
-     */
-    public double getScore() {
-        //MEANSQUAREDERROR
-        double score=0.0;
-        for(Participant p: participants){
-            double deviation= 3-p.getRating(p.getProject());
-            deviation*=deviation;
-            score+=deviation;
-        }
-        score/=participants.size();
-        return score;
-    }
+
 
     /**
      * {@link Distribution#participants}
@@ -210,12 +194,38 @@ public class Distribution {
         }
         return notTakingPlace;
     }
-
+    /**
+     * Calculates the score of a Distribution. This score represents how good the distributionalgorithm did on the distribution.
+     * The perfect score is 0 and every score higher than 0 is worse than the perfect score.
+     *The score is mean squared
+     * @param powerOf The power with which the deviation should be powered with
+     * @return the score of the distribution
+     */
+    public double getScore(int powerOf) {
+        //MEANSQUAREDERROR
+        double score=0.0;
+        for(Participant p: participants){
+            double deviation=0;
+            if(p.getProject()==null){
+                deviation=4;
+            }else{
+                deviation= 3-p.getRating(p.getProject());
+            }
+            deviation=Math.abs(deviation);
+            for(int k=1;k<powerOf;k++){
+                deviation*=deviation;
+            }
+            score+=deviation;
+        }
+        score/=participants.size();
+        return score;
+    }
     /**
      *
      * @return true if there is enough space for all participants in projects
      */
     public boolean isValid(){
+        //TODO do this shit with class levels
         int amtParticipants= this.participants.size();
         int amtSpace=0;
         for(Project p: this.projects){
@@ -276,7 +286,7 @@ public class Distribution {
         for(Project p: projects){
             s+=p.toString()+"\n";
         }
-        s+="\n Score: "+this.getScore()+"";
+        s+="\n Score: "+this.getScore(2)+"";
         return s;
     }
 
