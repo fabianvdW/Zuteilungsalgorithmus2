@@ -103,7 +103,6 @@ public class CSVFileFilter extends javax.swing.filechooser.FileFilter {
 
     /**
      * Abstract, Automatic call at a Filter-Trigger, tests whether a specific file extension exists.
-     *
      * @return True, if extension exists, False if not
      */
     public boolean accept(File f) {
@@ -121,7 +120,6 @@ public class CSVFileFilter extends javax.swing.filechooser.FileFilter {
 
     /**
      * Abstract, automatic call at a Filter-Trigger
-     *
      * @return description of the CSV data
      */
     public String getDescription() {

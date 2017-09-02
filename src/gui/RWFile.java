@@ -89,6 +89,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+
 public class  RWFile {
     /**
      * @author Agent77326
@@ -102,6 +103,7 @@ public class  RWFile {
     public static void write(File fh, String txt) {
         Writer w = null;
         try {
+
             w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fh), StandardCharsets.UTF_8));
             w.write(txt);
         } catch (IOException ex) {
@@ -131,6 +133,8 @@ public class  RWFile {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         return null;
     }
+
 }
