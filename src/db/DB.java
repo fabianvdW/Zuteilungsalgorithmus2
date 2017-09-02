@@ -215,16 +215,22 @@ public class DB {
 	/**
 	 * @author Agent77326
 	 */
+    /**
+     * connection to database
+     */
 	private Connection con;
+    /**
+     *true if db is connected to a database
+     */
 	private boolean isConnected;
 
 	/**
-	 * Klasse um mit einem MYSQl Server zu interagieren
-	 * @param server Der Server, mit dem man sich verbinden soll
-	 * @param port  Der Server-Port, den MYSQL benutzt, Default:3306
-	 * @param user Der Benutzer, der auf den Server zugreifen will
-	 * @param password Das Password zum authentifizieren
-	 * @param database Die Datenbank, mit der sich verbunden werden soll
+	 * Class to interact with a MYSQl server
+	 * @param server server to be connected
+	 * @param port  server-port Default-MYSQL:3306
+	 * @param user user who wants to interact with server
+	 * @param password password of user
+	 * @param database database to be connected
 	 */
 	protected DB(String server, int port, String user, String password, String database){
 		try{
@@ -244,51 +250,90 @@ public class DB {
 			lgr.log(Level.WARNING, e.getMessage(), e);
 		}
 	}
-	
+    /**
+     * Closes connection to server
+     */
+    protected void close(){
+        if(con!=null){
+            try{
+                con.close();
+                isConnected = false;
+            }
+            catch(SQLException e){
+                Logger lgr = Logger.getLogger(DB.class.getName());
+                lgr.log(Level.SEVERE, e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * Converts the ResultSet into a two-dimensional string
+     * Important, the first line is filled with the names of the columns
+     * @param rs ResultSet of query()
+     * @return String[][] with data
+     */
+    private String[][] fetch(ResultSet rs){
+        String[][] data = null;
+        try {
+            int i = 0;
+            while(rs.next()){
+                i++;
+            }
+            rs.first();
+            int n = rs.getMetaData().getColumnCount();
+            data = new String[i + 1][n];
+            for(int j = 0; j < n; j++){
+                data[0][j] = rs.getMetaData().getColumnName(j + 1);
+            }
+            if(i < 1){
+                return data;
+            }
+            i = 1;
+            do{
+                for(int j = 0; j < n; j++){
+                    data[i][j] = rs.getString(j + 1);
+                }
+                i++;
+            }while(rs.next());
+        }
+        catch (SQLException e){
+            Logger lgr = Logger.getLogger(DB.class.getName());
+            lgr.log(Level.WARNING, e.getMessage(), e);
+        }
+        finally {
+            try{
+                rs.close();
+            }
+            catch(SQLException e){
+                Logger lgr = Logger.getLogger(DB.class.getName());
+                lgr.log(Level.SEVERE, e.getMessage(), e);
+            }
+        }
+        return data;
+    }
+
 	/**
-	 * Gibt die Anzahl der Datensätze für die gegebene Tabelle zurück
-	 * @param table Der name der Tabelle
-	 * @return Die Größe der Tabelle
+	 * Returns the number of records for the given table.
+	 * @param table Name of table
+	 * @return size of table
 	 */
 	protected int getSize(String table){
 		return query("SELECT `id` FROM `" + table + "`")[0].length - 1;
 	}
+
+	/**
+     * @return True if DB is connected to the server, False if DB is not connected to the server.
+     */
+    protected boolean isConnected(){
+        return isConnected;
+    }
+
+
 	
 	/**
-	 * Benutze das zum updaten, einfügen und löschen von Daten, zum Lesen die Funktion query() benutzen;
-	 * @param  sql Das SQL Statement mit Wildcards z.B.: "insert into  database.table values (default, ?, ?, ?, ?, ?, ?)"
-	 * @param data Die Daten hier werden in die Wildcards eingefügt
-	 */
-	protected void update(String sql, String[] data){
-		PreparedStatement ps = null;
-		try{
-			ps = con.prepareStatement(sql);
-			for(int i = 0; i < data.length; i++){
-				ps.setString(i + 1, data[i]);
-			}
-			ps.executeUpdate();
-		}
-		catch(SQLException e){
-			Logger lgr = Logger.getLogger(DB.class.getName());
-			lgr.log(Level.WARNING, e.getMessage(), e);
-		}
-		finally{
-			try{
-				if(ps != null){
-					ps.close();
-	            }
-	        }
-			catch(SQLException e){
-				Logger lgr = Logger.getLogger(DB.class.getName());
-				lgr.log(Level.SEVERE, e.getMessage(), e);
-	        }
-		}
-	}
-	
-	/**
-	 * Geniert eine Abfrage zum Server
-	 * @param sql Die Abfrage als SQL-Statement
-	 * @return Die zurückgegebene Daten des Servers als zwei dimensionaler Array
+	 * Generates a query to the server
+	 * @param sql The query as SQL statement
+	 * @return The returned data of the server as two dimensional array
 	 */
 	protected String[][] query(String sql){
 		try{
@@ -308,10 +353,34 @@ public class DB {
 		}
 		return null;
 	}
-	
+
+    /**
+     * Generates a query to the server
+     * @param sql The query as SQL statement
+     * @return The returned data of the server as two dimensional array
+     */
+    protected String[][] query(PreparedStatement sql){
+        try{
+            ResultSet tmp = sql.executeQuery();
+            try{
+                sql.close();
+            }
+            catch(SQLException e){
+                Logger lgr = Logger.getLogger(DB.class.getName());
+                lgr.log(Level.SEVERE, e.getMessage(), e);
+            }
+            return fetch(tmp);
+        }
+        catch(SQLException e){
+            Logger lgr = Logger.getLogger(DB.class.getName());
+            lgr.log(Level.WARNING, e.getMessage(), e);
+        }
+        return null;
+    }
+
 	/**
-	 * Ändert die Daten einer DB
-	 * @param sql Die Abfrage als SQL-Statement
+	 * Changes data of database
+	 * @param sql The query as sql statement
 	 */
 	protected void update(String sql){
 		try{
@@ -330,97 +399,38 @@ public class DB {
 			lgr.log(Level.WARNING, e.getMessage(), e);
 		}
 	}
+    /**
+     *  Use the query () function to update, insert, and delete data, and read it.
+     * @param  sql Sql statement
+     * @param data The data here is inserted into the wildcards
+     */
+    protected void update(String sql, String[] data){
+        PreparedStatement ps = null;
+        try{
+            ps = con.prepareStatement(sql);
+            for(int i = 0; i < data.length; i++){
+                ps.setString(i + 1, data[i]);
+            }
+            ps.executeUpdate();
+        }
+        catch(SQLException e){
+            Logger lgr = Logger.getLogger(DB.class.getName());
+            lgr.log(Level.WARNING, e.getMessage(), e);
+        }
+        finally{
+            try{
+                if(ps != null){
+                    ps.close();
+                }
+            }
+            catch(SQLException e){
+                Logger lgr = Logger.getLogger(DB.class.getName());
+                lgr.log(Level.SEVERE, e.getMessage(), e);
+            }
+        }
+    }
 	
-	/**
-	 * Generier eine Abfrage zum Server
-	 * @param sql Die Abfrage als SQL-Statement
-	 * @return Die zurückgegebenen Daten als zwei-dimensionales String Array
-	 */
-	protected String[][] query(PreparedStatement sql){
-		try{
-			ResultSet tmp = sql.executeQuery();
-			try{
-				sql.close();
-			}
-			catch(SQLException e){
-				Logger lgr = Logger.getLogger(DB.class.getName());
-				lgr.log(Level.SEVERE, e.getMessage(), e);
-			}
-			return fetch(tmp);
-		}
-		catch(SQLException e){
-			Logger lgr = Logger.getLogger(DB.class.getName());
-			lgr.log(Level.WARNING, e.getMessage(), e);
-		}
-		return null;
-	}
+
 	
-	/**
-	 * Wandelt das ResultSet in ein zwei-dimensionalen String um
-	 * Wichtig, die erste Zeile ist gefüllt mit den Namen der Spalten
-	 * @param rs Das ResultSet einer query()
-	 * @return String[][] mit den Daten
-	 */
-	private String[][] fetch(ResultSet rs){
-		String[][] data = null;
-		try {
-			int i = 0;
-			while(rs.next()){
-				i++;
-			}
-			rs.first();
-			int n = rs.getMetaData().getColumnCount();
-			data = new String[i + 1][n];
-			for(int j = 0; j < n; j++){
-				data[0][j] = rs.getMetaData().getColumnName(j + 1);
-			}
-			if(i < 1){
-				return data;
-			}
-			i = 1;
-			do{
-				for(int j = 0; j < n; j++){
-					data[i][j] = rs.getString(j + 1);
-				}
-				i++;
-			}while(rs.next());
-		}
-		catch (SQLException e){
-			Logger lgr = Logger.getLogger(DB.class.getName());
-			lgr.log(Level.WARNING, e.getMessage(), e);
-		}
-		finally {
-			try{
-				rs.close();
-			}
-			catch(SQLException e){
-				Logger lgr = Logger.getLogger(DB.class.getName());
-				lgr.log(Level.SEVERE, e.getMessage(), e);
-			}
-		}
-		return data;
-	}
-	
-	/**
-	 * @return True wenn DB mit dem Server verbunden ist, False wenn DB nicht mit dem Server verbunden ist
-	 */
-	protected boolean isConnected(){
-		return isConnected;
-	}
-	
-	/**
-	 * Schließt die Verbindung mit dem Server
-	 */
-	protected void close(){
-		if(con!=null){
-			try{
-				con.close();
-				isConnected = false;
-			}
-			catch(SQLException e){
-				Logger lgr = Logger.getLogger(DB.class.getName());
-				lgr.log(Level.SEVERE, e.getMessage(), e);
-			}
-		}
-	}
+
 }
