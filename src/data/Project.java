@@ -160,6 +160,22 @@ public class Project {
     }
 
     /**
+     *
+     * @param o Object to be compared with
+     * @return true if id is same
+     */
+    @Override
+    public boolean equals(Object o){
+        Project p=null;
+        if(o instanceof  Project){
+            p=(Project)o;
+        }else{
+            return false;
+        }
+        return this.getID()==p.getID();
+
+    }
+    /**
      * {@link Project#allowedClasses}
      *
      * @return attribute allowedClasses

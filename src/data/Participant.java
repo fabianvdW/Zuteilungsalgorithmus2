@@ -94,6 +94,10 @@ public class Participant {
     /**
      * unique id of the participant
      */
+    /**
+     * ID of a person, unique
+     */
+    private int id;
     private static int idCount;
     /**
      * non-unique name of the participant
@@ -107,7 +111,6 @@ public class Participant {
 
     /**
      * Constructs participant with non-random name, class level and an arraylist with ratings for the projects
-     *
      * @param name       Name of the participant
      * @param classLevel class level of the participant
      * @param ratings    ratings of the participant for the projects
@@ -116,11 +119,12 @@ public class Participant {
         this.name = name;
         this.classLevel = classLevel;
         this.ratings = ratings;
+        this.id=idCount;
+        idCount++;
     }
 
     /**
      * Constructs participant with random name, class level and an arraylist with ratings for the projects
-     *
      * @param classLevel class level of the participant
      * @param ratings    ratings of the participant for the projects
      */
@@ -129,19 +133,25 @@ public class Participant {
         this.classLevel = classLevel;
         this.ratings = ratings;
     }
-
     /**
-     * {@link Participant#project}
      *
-     * @return project of participant
+     * @param o Object to be compared with
+     * @return true if id is same
      */
-    public Project getProject() {
-        return project;
+    @Override
+    public boolean equals(Object o){
+        Participant p=null;
+        if(o instanceof  Participant){
+            p=(Participant) o;
+        }else{
+            return false;
+        }
+        return this.getID()==p.getID();
+
     }
 
     /**
      * {@link Participant#classLevel}
-     *
      * @return class level
      */
     public int getClassLevel() {
@@ -149,14 +159,26 @@ public class Participant {
     }
 
     /**
+     * {@link Participant#id}
+     * @return id of person
+     */
+    public int getID(){
+        return this.id;
+    }
+    /**
      * {@link Participant#name}
-     *
      * @return name of person
      */
     public String getName() {
         return name;
     }
-
+    /**
+     * {@link Participant#project}
+     * @return project of participant
+     */
+    public Project getProject() {
+        return project;
+    }
     /**
      * @param rating ratings of the participant for the projects
      * @return all projects participant voted for with specified rating
@@ -197,7 +219,6 @@ public class Participant {
 
     /**
      * {@link Participant#ratings}
-     *
      * @return ratings of participant
      */
     public ArrayList<Rating> getRatings() {
@@ -209,7 +230,7 @@ public class Participant {
      *
      * @param p project you want to set for the participant
      */
-    public void setProject(Project p) {
+    public void setProject(Project p){
         project = p;
     }
 }
