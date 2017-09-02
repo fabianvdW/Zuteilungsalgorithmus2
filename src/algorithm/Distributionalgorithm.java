@@ -101,7 +101,8 @@ public class Distributionalgorithm {
     /**
      * returns whether the participant is able to join the project or not
      *
-     * @param participant who is supposed ot be checked for joining the project
+     * @param participant who is supposed to be checked for joining the project
+     * @param project project to be checked on
      * @return true if able to join and false if not able to join
      */
     public static boolean isParticipantAllowedOnProject(Participant participant, Project project) {
