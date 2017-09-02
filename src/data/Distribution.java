@@ -152,7 +152,15 @@ public class Distribution {
      * @return the score of the distribution
      */
     public double getScore() {
-        return 0;
+        //MEANSQUAREDERROR
+        double score=0.0;
+        for(Participant p: participants){
+            double deviation= 3-p.getRating(p.getProject());
+            deviation*=deviation;
+            score+=deviation;
+        }
+        score/=participants.size();
+        return score;
     }
 
     /**
