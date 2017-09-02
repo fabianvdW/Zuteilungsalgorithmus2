@@ -80,6 +80,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 package data;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class Project {
     /**
@@ -131,6 +132,16 @@ public class Project {
         this.maxSize = maxSize;
         this.allowedClasses = allowedClasses;
         this.participants = new ArrayList<Participant>();
+    }
+    /**
+     * Constructs new Project with random name
+     *
+     * @param allowedClasses Contains the classes allowed to participate in this project
+     * @param minSize        Contains the minimum amout of participants for the project
+     * @param maxSize        Contains the minimum amout of participants for the project
+     */
+    public Project(ArrayList<Integer> allowedClasses, int minSize, int maxSize) {
+        this(allowedClasses,UUID.randomUUID().toString(),minSize,maxSize);
     }
 
     /**

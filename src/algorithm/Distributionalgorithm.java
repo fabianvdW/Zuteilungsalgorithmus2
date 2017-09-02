@@ -82,6 +82,7 @@ package algorithm;
 import data.Distribution;
 import data.Participant;
 import data.Project;
+import test.TestDistribution;
 
 import java.util.ArrayList;
 
@@ -106,9 +107,18 @@ public class Distributionalgorithm {
      * @return true if able to join and false if not able to join
      */
     public static boolean isParticipantAllowedOnProject(Participant participant, Project project) {
-        return(project.getAllowedClasses().contains(participant.getClassLevel()) && !project.isFull());
+        return(project.getAllowedClasses().contains(participant.getClassLevel()) && !project.isFull()&& !project.getParticipants().contains(participant));
     }
 
+    /**
+     * Main method
+     * @param args extra mega unimportant arguments that do nothing
+     */
+    public static void main(String[] args){
+        Distribution d=TestDistribution.generateDistribution();
+        System.out.println("hallo");
+        System.out.println(d.toString());
+    }
     /**
      * Shuffles the dataset of the distribution
      *
@@ -116,9 +126,9 @@ public class Distributionalgorithm {
      */
     public static void shuffleDistribution(Distribution d) {
         ArrayList<Participant> shuffledParticipants = new ArrayList<Participant>(d.getParticipants().size());
-        ArrayList<Participant> shuffleParticipants = d.getParticipants();
+        ArrayList<Participant> shuffleParticipants =new ArrayList<Participant>( d.getParticipants());
         ArrayList<Project> shuffledProjects = new ArrayList<Project>(d.getProjects().size());
-        ArrayList<Project> shuffleProjects = d.getProjects();
+        ArrayList<Project> shuffleProjects = new ArrayList<Project>(d.getProjects());
         while (shuffleParticipants.size() != 0) {
             int random = (int)(Math.random() * (shuffledParticipants.size()));
             shuffledParticipants.add(shuffleParticipants.get(random));

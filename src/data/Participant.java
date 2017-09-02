@@ -107,7 +107,18 @@ public class Participant {
      * Arraylist with the ratings of the participant for all the projects
      */
     private ArrayList<Rating> ratings;
-
+    /**
+     * Constructs participant with non-random name, class level and an arraylist with ratings for the projects
+     * @param name       Name of the participant
+     * @param classLevel class level of the participant
+     */
+    public Participant(String name, int classLevel) {
+        this.name = name;
+        this.classLevel = classLevel;
+        this.ratings = new ArrayList<Rating>();
+        this.id=idCount;
+        idCount++;
+    }
 
     /**
      * Constructs participant with non-random name, class level and an arraylist with ratings for the projects
@@ -126,12 +137,9 @@ public class Participant {
     /**
      * Constructs participant with random name, class level and an arraylist with ratings for the projects
      * @param classLevel class level of the participant
-     * @param ratings    ratings of the participant for the projects
      */
-    public Participant(int classLevel, ArrayList<Rating> ratings) {
-        name = UUID.randomUUID().toString();
-        this.classLevel = classLevel;
-        this.ratings = ratings;
+    public Participant(int classLevel) {
+        this(UUID.randomUUID().toString(),classLevel);
     }
     /**
      *
@@ -205,6 +213,9 @@ public class Participant {
     public int getRating(Project p) {
         int ratingOfP = 100;
         for (Rating r : ratings) {
+            if(p==null){
+                System.out.println("das ist null omg");
+            }
             if (r.getProject().getID() == p.getID()) {
                 ratingOfP = r.getRating();
             }
@@ -235,13 +246,25 @@ public class Participant {
     }
 
     /**
+     * Overwrites attr. ratings
+     * @param ratings ratings to be set
+     */
+    public void setRatings(ArrayList<Rating> ratings){
+        this.ratings=ratings;
+    }
+    /**
      *
      * @return String describing object
      */
     @Override
     public String toString(){
         String s="";
-        s+="Name: "+this.name+"\n"+"ClassLevel: "+this.classLevel+ "\n"+"Project: "+this.project.toString();
+        if(project!=null){
+            s+="Name: "+this.name+"\n"+"ClassLevel: "+this.classLevel+ "\n"+"Project: "+this.project.toString();
+        }else{
+            s+="Name: "+this.name+"\n"+"ClassLevel: "+this.classLevel+ "\n"+"Project: null";
+        }
+
         return s;
     }
 }
