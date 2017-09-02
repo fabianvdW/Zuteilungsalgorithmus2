@@ -217,9 +217,9 @@ public class RWFile{
 	 * @author Agent77326
 	 */
 	/**
-	 * Schreibt den String zu einem gegebenen File
-	 * @param fh Die Datei
-	 * @param txt Der String, der geschrieben werden soll
+	 * Prints the string to a given file
+	 * @param fh The file
+	 * @param txt the string to be printed to the file
 	 */
 	public static void write(File fh, String txt){
 		Writer w = null;
@@ -244,9 +244,9 @@ public class RWFile{
 	}
 	
 	/**
-	 * Liest den Inhalb einer Datei
-	 * @param fh Die Datei
-	 * @return Den Inhalt der Datei als String
+	 * reads the file
+	 * @param fh The file
+	 * @return The content fo the file as string
 	 */
 	public static String read(File fh){
 		try{
