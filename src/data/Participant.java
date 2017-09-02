@@ -107,6 +107,7 @@ public class Participant {
 
     /**
      * Constructs participant with non-random name, class level and an arraylist with ratings for the projects
+     *
      * @param name       Name of the participant
      * @param classLevel class level of the participant
      * @param ratings    ratings of the participant for the projects
@@ -119,6 +120,7 @@ public class Participant {
 
     /**
      * Constructs participant with random name, class level and an arraylist with ratings for the projects
+     *
      * @param classLevel class level of the participant
      * @param ratings    ratings of the participant for the projects
      */
@@ -130,6 +132,7 @@ public class Participant {
 
     /**
      * {@link Participant#project}
+     *
      * @return project of participant
      */
     public Project getProject() {
@@ -138,6 +141,7 @@ public class Participant {
 
     /**
      * {@link Participant#classLevel}
+     *
      * @return class level
      */
     public int getClassLevel() {
@@ -146,6 +150,7 @@ public class Participant {
 
     /**
      * {@link Participant#name}
+     *
      * @return name of person
      */
     public String getName() {
@@ -192,6 +197,7 @@ public class Participant {
 
     /**
      * {@link Participant#ratings}
+     *
      * @return ratings of participant
      */
     public ArrayList<Rating> getRatings() {
@@ -203,7 +209,7 @@ public class Participant {
      *
      * @param p project you want to set for the participant
      */
-    public void setProject(Project p){
+    public void setProject(Project p) {
         project = p;
     }
 }
