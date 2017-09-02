@@ -1,0 +1,3 @@
+Eine bestimmte Anzahl x an Teilnehmern werden basierend auf ihren Wünschen auf y Projekte zugeteilt.
+Dabei besitzt jeder Teilnehmer neben seinem Namen seine zugehörige Klasse und die Projekte haben eine Maximale Anzahl an Teilnehmern, sowie eine Mindestanzahl, ab der sie stattfinden können.
+Zudem kann für jedes Projekt festgelegt werden, welche Klassenstufe(n) für das Projekt erlaubt sind.
