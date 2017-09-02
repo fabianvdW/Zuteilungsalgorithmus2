@@ -96,11 +96,12 @@ public class Rating {
     private int rating;
 
     /**
+     *
      * @param participant participant who rated
-     * @param project     project which is rated
-     * @param rating      rating for project of participant who rated
+     * @param project project which is rated
+     * @param rating rating for project of participant who rated
      */
-    Rating(Participant participant, Project project, int rating) {
+    Rating(Participant participant, Project project, int rating){
         this.participant = participant;
         this.project = project;
         this.rating = rating;
@@ -108,7 +109,6 @@ public class Rating {
 
     /**
      * returns participant who rated
-     *
      * @return participant who rated
      */
     public Participant getP() {
@@ -117,7 +117,6 @@ public class Rating {
 
     /**
      * returns project which is rated
-     *
      * @return project which is rated
      */
     public Project getProject() {
@@ -126,7 +125,6 @@ public class Rating {
 
     /**
      * returns rating for project of participant who rated
-     *
      * @return rating for project of participant who rated
      */
     public int getRating() {

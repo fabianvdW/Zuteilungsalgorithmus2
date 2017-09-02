@@ -109,6 +109,7 @@ import javax.swing.KeyStroke;
 
 import db.DBManager;
 
+
 public class GUI extends JFrame {
     /**
      * sets serialVersionUID to 1L
@@ -120,10 +121,13 @@ public class GUI extends JFrame {
      */
     private JMenuItem conDB, impDB, expDB, exDB;
 
+
     /**
      * Mainframe text fields
      */
+
     private JTextField isConnField, agField, pField;
+
 
     /**
      * Login-frame dialog
@@ -133,21 +137,28 @@ public class GUI extends JFrame {
     /**
      * Login-frame text fields
      */
+
     private JTextField loginServerField, loginServerPortField, loginUserField, loginDatabaseField;
+
 
     /**
      * Login-frame password field
      */
+
     private JPasswordField loginPasswordField;
+
 
     /**
      * Project selection
      */
+
     private JComboBox<String> selectAG;
+
 
     /**
      * Database
      */
+
     private DBManager dbm;
 
     /**
@@ -174,9 +185,11 @@ public class GUI extends JFrame {
         mainFrame();
     }
 
+
     /**
      * Method resposible for the main-frame
      */
+
     protected void mainFrame() {
         getContentPane().removeAll();
         getContentPane().revalidate();
@@ -203,6 +216,7 @@ public class GUI extends JFrame {
                         showError("Die Datei würde theoretisch jetzt eingelesen werden", "Datei Import");
                         // import needed
                         /*
+
 				    	String txt = "ID,Name,Mindestanzahl,Höchstanzahl,Teilnehmer" + System.lineSeparator();
 				    	for(AG ag: Algorithmus.Verteilungsalgorithmus.ag){
 				    		txt += ag.getId() + "," + ag.getName() + "," + ag.getMindestanzahl() + "," + ag.getHoechstanzahl() + ",";
@@ -302,6 +316,7 @@ public class GUI extends JFrame {
 				    		txt += System.lineSeparator();
 				    	}
 				    	*/
+
                         RWFile.write(fh, txt);
                     }
                 }
@@ -447,9 +462,11 @@ public class GUI extends JFrame {
         table.setVisible(true);
     }
 
+
     /**
      * Method responsible for the login
      */
+
     protected void showLogin() {
         loginDialog = new JDialog(this, "Server Login", true);
         loginDialog.getContentPane().setLayout(new GridLayout(6, 1));
@@ -523,10 +540,13 @@ public class GUI extends JFrame {
         loginDialog.setVisible(true);
     }
 
+
     /**
      * Method responsible for showing a list of all projects
      */
+
     protected void showAGList() {
+
 		/*String[][] agList = new String[Algorithmus.Verteilungsalgorithmus.ag.size()][5];
 		int i = 0;
 		String teilnehmer = null;
@@ -572,12 +592,16 @@ public class GUI extends JFrame {
 		String[] agListHead = new String[]{"Name", "Mindestanzahl", "Höchstanzahl", "Erlaubte Jahrgänge", "Teilnehmer"};
 		showTable(agListHead, agList, "Alle AGs");
 		*/
+
     }
+
 
     /**
      * Method responsible for showing a list of all participants
      */
+
     protected void showPersonenList() {
+
 	    /*
 		String[][] persList = new String[Algorithmus.Verteilungsalgorithmus.personen.size()][6];
 		int i = 0;
@@ -615,6 +639,7 @@ public class GUI extends JFrame {
 		String[] persListHead = new String[]{"Klasse", "Name", "Geschlecht", "Geburtsdatum", "Aktuelle AG", "Gewählte AGs"};
 		showTable(persListHead, persList, "Schüler-Liste");
 		*/
+
     }
 
     /**
@@ -679,9 +704,11 @@ public class GUI extends JFrame {
         }
     }
 
+
     /**
      * Method responsible for repainting
      */
+
     public void repaint() {
         isConnField.setText((dbm.isConnected() ? "Ja" : "Nein"));
         //agField.setText("" + Algorithmus.Verteilungsalgorithmus.ag.size());
@@ -700,13 +727,16 @@ public class GUI extends JFrame {
         super.repaint();
     }
 
+
     /**
      * Method responsible for showing project selection
      */
+
     protected void showAGSelection() {
         JDialog ags = new JDialog(this, "AG zum Anzeigen auswählen", false);
         //String[] labels = new String[Algorithmus.Verteilungsalgorithmus.ag.size() + 1];
         //labels[0] = "Alle";
+
 		/*for(int i = 0; i < Algorithmus.Verteilungsalgorithmus.ag.size(); i++){
 			labels[i + 1] = Algorithmus.Verteilungsalgorithmus.ag.get(i).getName();
 		}
@@ -765,6 +795,7 @@ public class GUI extends JFrame {
 			}
 		});
 		*/
+
         //ags.getContentPane().add(button);
         //button = new JButton("Abbrechen");
         //button.addActionListener(new ActionListener(){
@@ -831,4 +862,5 @@ public class GUI extends JFrame {
             System.exit(0);
         }
     }
+
 }
