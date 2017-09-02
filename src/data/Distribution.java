@@ -222,8 +222,38 @@ public class Distribution {
      */
     @Override
     public String toString(){
-        //TODO
-        return "";
+
+        String s= "";
+        s+=" Valid: "+this.isValid();
+        s+="\n";
+        s+=" Participants are all Allocated: "+this.allParticipantsAreAllocated();
+        s+="\n";
+        s+=" All Projects Take Place: "+this.allProjectsTakePlace();
+        s+="\n";
+        s+="Amount of Participans in distribution: "+this.participants.size();
+        s+="\n";
+        s+="Amount of Projects in distribution: "+this.projects.size() ;
+        s+="\n";
+        s+="Participants that are not allocated to a project: "+ this.getParticipantsNotAllocated().size();
+        s+="\n";
+        for(Participant p: this.getParticipantsNotAllocated()){
+            s+=p.toString()+"\n";
+        }
+        s+="Projects not taking place: "+this.getProjectsNotTakingPlace().size();
+        s+="\n";
+        for(Project p: this.getProjectsNotTakingPlace()){
+            s+=p.toString()+"\n";
+        }
+        s+="All Participants: "+ "\n";
+        for(Participant p: participants){
+            s+=p.toString()+"\n";
+        }
+        s+="All Projects: "+"\n";
+        for(Project p: projects){
+            s+=p.toString()+"\n";
+        }
+        s+="\n Score: "+this.getScore()+"";
+        return s;
     }
 
 }

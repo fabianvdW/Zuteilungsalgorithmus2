@@ -233,4 +233,15 @@ public class Participant {
     public void setProject(Project p){
         project = p;
     }
+
+    /**
+     *
+     * @return String describing object
+     */
+    @Override
+    public String toString(){
+        String s="";
+        s+="Name: "+this.name+"\n"+"ClassLevel: "+this.classLevel+ "\n"+"Project: "+this.project.toString();
+        return s;
+    }
 }
