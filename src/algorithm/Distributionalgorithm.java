@@ -128,6 +128,8 @@ public class Distributionalgorithm {
             shuffledProjects.add(shuffleProjects.get(random));
             shuffleProjects.remove(random);
         }
+        d.setParticipants(shuffledParticipants);
+        d.setProjects(shuffledProjects);
     }
 }
 
