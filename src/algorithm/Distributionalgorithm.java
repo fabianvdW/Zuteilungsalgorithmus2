@@ -95,6 +95,11 @@ public class Distributionalgorithm {
      * @return distributed dataset
      */
     public static Distribution finishDistribution(Distribution d) {
+        if(!d.isValid()){
+            System.out.println("Invalid distribution");//DEBUG
+            System.exit(0);//DEBUG
+            return null;
+        }
         shuffleDistribution(d);
         return d;
     }

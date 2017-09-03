@@ -145,7 +145,23 @@ public class Distribution {
         return true;
     }
 
-
+    /**
+     *
+     * @param summarizedClassLevels the list to be checked
+     * @param i One fo the classLevels to be checked
+     * @param k One of the classLevels to be checked
+     * @return the classlevel of the ArrayList which contains either Class level i or k
+     */
+    private ClassLevel getClassLevelOfClassLevelsWhichContainsClassLevelsParam(ArrayList<ClassLevel> summarizedClassLevels,ClassLevel i, ClassLevel k){
+        assert(i.classLevel.size()==1);
+        assert(k.classLevel.size()==1);
+        for(ClassLevel c: summarizedClassLevels){
+            if(c.classLevel.contains(i.classLevel.get(0)) || c.classLevel.contains(k.classLevel.get(0))){
+                return c;
+            }
+        }
+        return null;
+    }
 
     /**
      * {@link Distribution#participants}
@@ -156,6 +172,34 @@ public class Distribution {
         return this.participants;
     }
 
+    /**
+     *
+     * @param classlevel class level to get the participants of
+     * @return arraylist of participants in specified classlevel
+     */
+    /*
+    public ArrayList<Participant> getParticipantsInClassLevel(int classlevel){
+        ArrayList<Participant> participants1= new ArrayList<Participant>();
+        ArrayList<Integer> classLevels= this.getUniqueClassLevels();
+        boolean containsClassLevel=false;
+        for(Integer i: classLevels){
+           if(i.intValue()==classlevel){
+               containsClassLevel=true;
+           }
+        }
+        if(containsClassLevel){
+            for(Participant p: participants){
+                if(p.getClassLevel()==classlevel){
+                    participants1.add(p);
+                }
+            }
+        }else{
+            System.out.println("Tried getting participants of non exisiting classlevel"); //DEBUG
+            System.exit(0);//DEBUG
+            return null;
+        }
+        return participants1;
+    }*/
     /**
      * Returns all the participants that are not allocated to a project yet
      *
@@ -220,6 +264,125 @@ public class Distribution {
         score/=participants.size();
         return score;
     }
+
+    /**
+     *
+     * @return amount of participants that can be in all the projects
+     */
+    public int getSpaceOfProjects(){
+        int size=0;
+        for(Project p: projects){
+            size +=p.getMaxSize();
+        }
+        return size;
+    }
+    /**
+     *@return All of the unique classLevels of all the projects
+     */
+    public ClassLevel[] getUniqueClassLevels(){
+        /*
+        Adds all the unique classLevels to an ArrayList of classLevels
+         */
+        ArrayList<Integer> classLevels = new ArrayList<Integer>();
+        for(Participant p: this.participants){
+            Integer i= p.getClassLevel();
+            if(!classLevels.contains(i)){
+                classLevels.add(i);
+            }
+
+        }
+        /*
+        Convers ArrayList from above in to ClassLevel objects and to an Arraylist of ClassLevels
+         */
+        ArrayList<ClassLevel> classLevelArrayList= new ArrayList<ClassLevel>();
+        for(Integer i: classLevels){
+            ArrayList<Participant> participantsInClassLevel= new ArrayList<Participant>();
+            for(Participant p: participants){
+                if(p.getClassLevel()==i){
+                    participantsInClassLevel.add(p);
+                }
+            }
+            ArrayList<Integer> classLevel= new ArrayList<Integer>();
+            classLevel.add(i);
+            ClassLevel c= new ClassLevel(participantsInClassLevel.size(),classLevel,participantsInClassLevel);
+            classLevelArrayList.add(c);
+        }
+        /*
+        Adds all the projects to the ClassLevels
+         */
+        for(Project p: projects){
+            for(Integer i: p.getAllowedClasses().getClassLevels()){
+                for(ClassLevel c: classLevelArrayList){
+                    if(c.classLevel.contains(i)&&!c.projects.contains(p)){
+                        c.projects.add(p);
+                    }
+                }
+            }
+        }
+        /*
+        For each classLevels, checks if it has identical projects to another, and if so, they will combine to one summarizedClassLevel.
+
+
+         */
+        ArrayList<ClassLevel> summarizedClassLevels= new ArrayList<ClassLevel>();
+        for(int i=0;i<classLevelArrayList.size();i++){
+            for(int k=i+1;k<classLevelArrayList.size();k++){
+                if(classLevelArrayList.get(i).projects.equals(classLevelArrayList.get(k).projects)){
+                    //SORRY
+                    ClassLevel classLevel = this.getClassLevelOfClassLevelsWhichContainsClassLevelsParam(summarizedClassLevels,classLevelArrayList.get(i),classLevelArrayList.get(k));
+                    /*
+                    If the ClassLevel of either i or k was already combined, combine once more and don't do a fully new object
+                     */
+                    if(classLevel!=null){
+                        boolean containsI=false;
+                        boolean containsK=false;
+                        int classLevelI=classLevelArrayList.get(i).getClassLevels().get(0);
+                        int classLevelK=classLevelArrayList.get(k).getClassLevels().get(0);
+                        if(classLevel.getClassLevels().contains(classLevelI)){
+                            containsI=true;
+                        }
+                        if(classLevel.getClassLevels().contains(classLevelK)){
+                            containsK=true;
+                        }
+                        assert(!(containsI&&containsK));
+                        assert ((!containsI)&&(!containsK));
+                        if(containsI){
+                            classLevel.getClassLevels().add(classLevelK);
+                            ClassLevel klevel = classLevelArrayList.get(k);
+                            classLevel.amountOfParticipants+=klevel.amountOfParticipants;
+                            classLevel.participants.addAll(klevel.participants);
+                        }else{
+                            classLevel.getClassLevels().add(classLevelI);
+                            ClassLevel ilevel = classLevelArrayList.get(i);
+                            classLevel.amountOfParticipants+=ilevel.amountOfParticipants;
+                            classLevel.participants.addAll(ilevel.participants);
+                        }
+                    /*
+                    If the ClassLevel of neither of i or k was already combined, make a new combined ClassLevel Object for them
+                     */
+                    }else{
+                        ClassLevel klevel = classLevelArrayList.get(k);
+                        ClassLevel ilevel = classLevelArrayList.get(i);
+
+                        ClassLevel newClassLevel= new ClassLevel(klevel.amountOfParticipants+ilevel.amountOfParticipants,klevel.classLevel,klevel.participants);
+                        newClassLevel.participants.addAll(ilevel.participants);
+                        newClassLevel.classLevel.addAll(ilevel.classLevel);
+                        summarizedClassLevels.add(newClassLevel);
+                    }
+
+                }
+            }
+
+        }
+        /*
+        Converts summarizedclassLevels from above to classLevel array
+         */
+        ClassLevel[] classLevelArray= new ClassLevel[summarizedClassLevels.size()];
+        for(int i=0;i<summarizedClassLevels.size();i++){
+            classLevelArray[i]=summarizedClassLevels.get(i);
+        }
+        return classLevelArray;
+    }
     /**
      *
      * @return true if there is enough space for all participants in projects
@@ -227,11 +390,53 @@ public class Distribution {
     public boolean isValid(){
         //TODO do this shit with class levels
         int amtParticipants= this.participants.size();
-        int amtSpace=0;
-        for(Project p: this.projects){
-            amtSpace+=p.getMaxSize();
+        int amtSpace= getSpaceOfProjects();
+        if(amtSpace<amtParticipants){
+            return false;
         }
-        return amtSpace>=amtParticipants;
+          /*
+        Initializes ClassLevel Array which contains all of the ClassLevels in order to check if ones distribution can be valid.
+         */
+        //long millis = System.currentTimeMillis();//DEBUG
+        ClassLevel[] classLevels= this.getUniqueClassLevels();
+        //long millis2=System.currentTimeMillis();//DEBUG
+        //long diff= millis2-millis;//DEBUG
+        //System.out.println("Time: "+ diff);//DEBUG
+        //System.out.println("ClassLevel size: "+classLevels.length);//DEBUG
+        //System.exit(0);//DEBUG
+
+        /*
+        Cloning Participant list and Projects, starting to check if all of the participants can be distributed although there are classLevels
+         */
+        ArrayList<Participant> cloneParticipant= new ArrayList<Participant>(participants);
+        ArrayList<Project> cloneProjects= new ArrayList<Project>();
+        for(Project p: projects){
+            cloneProjects.add(new Project(p));
+        }
+        for(Project p: cloneProjects){
+            summarizeClassLevel(p,classLevels);
+        }
+        int classLevelSize=1;
+        int amtWastedSpace=0;
+        /*
+        If all the participants are distributed, the distribution is Valid, if not all of the participants can be distributed the distribution is not valid
+         */
+        while(cloneParticipant.size()>0 && amtSpace-amtWastedSpace>amtParticipants){
+            boolean foundProjectWithClassLevel=false;
+            for(Project p: cloneProjects){
+                if(p.getAllowedClasses().getClassLevels().size()==classLevelSize){
+                    foundProjectWithClassLevel=true;
+                }
+            }
+            classLevelSize++;
+            if(foundProjectWithClassLevel){
+                classLevelSize=1;
+            }
+        }
+        if(cloneParticipant.size()==0){
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -251,6 +456,20 @@ public class Distribution {
     }
 
     /**
+     * Summarizes ClassLevels in project
+     * @param p project to be summarized
+     * @param summarizedClasses the already summarizedClasses
+     */
+    public void summarizeClassLevel(Project p, ClassLevel[] summarizedClasses){
+        for(ClassLevel c: summarizedClasses){
+            for(Integer i: c.classLevel){
+                if(p.getAllowedClasses().getClassLevels().contains(i)){
+                    p.
+                }
+            }
+        }
+    }
+    /**
      * To String
      * @return String which represents object
      */
@@ -259,6 +478,8 @@ public class Distribution {
 
         String s= "";
         s+=" Valid: "+this.isValid();
+        s+="\n";
+        s+="Amount of Participants all the projects can hold: "+ this.getSpaceOfProjects();
         s+="\n";
         s+=" Participants are all Allocated: "+this.allParticipantsAreAllocated();
         s+="\n";
@@ -291,3 +512,4 @@ public class Distribution {
     }
 
 }
+

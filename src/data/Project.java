@@ -78,15 +78,14 @@ Unless required by applicable law or agreed to in writing, software distributed 
 
  */
 package data;
-
+import data.ClassLevel;
 import java.util.ArrayList;
 import java.util.UUID;
-
 public class Project {
     /**
      * Contains the classes allowed to participate in this project
      */
-    private ArrayList<Integer> allowedClasses;
+    private ClassLevel allowedClasses;
     /**
      * Unique id for Person
      */
@@ -100,7 +99,7 @@ public class Project {
      */
     private int maxSize;
     /**
-     * Contains the minimum amout of participants for the project
+     * Contains the minimum amount of participants for the project
      */
     private int minSize;
     /**
@@ -117,6 +116,19 @@ public class Project {
     private ArrayList<ArrayList<Participant>> ratings;
 
     /**
+     * Creates new Project object out of an exisiting one,Important participants and ratings wont be cloned!
+     * @param p project to be cloned
+     */
+    public Project(Project p){
+            this.id=p.id;
+            this.participants= new ArrayList<Participant>();
+            this.maxSize=p.maxSize;
+            this.minSize=p.minSize;
+            this.name=p.name;
+            this.ratings= new ArrayList<ArrayList<Participant>>();
+            this.allowedClasses= new ClassLevel(p.allowedClasses);
+    }
+    /**
      * Constructs new Project
      *
      * @param allowedClasses Contains the classes allowed to participate in this project
@@ -124,7 +136,7 @@ public class Project {
      * @param minSize        Contains the minimum amout of participants for the project
      * @param maxSize        Contains the minimum amout of participants for the project
      */
-    public Project(ArrayList<Integer> allowedClasses, String name, int minSize, int maxSize) {
+    public Project(ClassLevel allowedClasses, String name, int minSize, int maxSize) {
         this.id = idCount;
         idCount++;
         this.name = name;
@@ -140,7 +152,7 @@ public class Project {
      * @param minSize        Contains the minimum amout of participants for the project
      * @param maxSize        Contains the minimum amout of participants for the project
      */
-    public Project(ArrayList<Integer> allowedClasses, int minSize, int maxSize) {
+    public Project(ClassLevel allowedClasses, int minSize, int maxSize) {
         this(allowedClasses,UUID.randomUUID().toString(),minSize,maxSize);
     }
 
@@ -191,7 +203,7 @@ public class Project {
      *
      * @return attribute allowedClasses
      */
-    public ArrayList<Integer> getAllowedClasses() {
+    public ClassLevel getAllowedClasses() {
         return this.allowedClasses;
     }
 

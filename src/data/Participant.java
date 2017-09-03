@@ -107,6 +107,18 @@ public class Participant {
      * Arraylist with the ratings of the participant for all the projects
      */
     private ArrayList<Rating> ratings;
+
+    /**
+     * Creates a new participant object out of an existing one
+     * @param p participant to be cloned
+     */
+    public Participant(Participant p){
+        this.ratings= new ArrayList<Rating>();
+        this.project=null;
+        this.classLevel=p.classLevel;
+        this.id=p.id;
+        this.name=p.name;
+    }
     /**
      * Constructs participant with non-random name, class level and an arraylist with ratings for the projects
      * @param name       Name of the participant
