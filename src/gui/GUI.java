@@ -557,10 +557,10 @@ public class GUI extends JFrame {
 				agList[i][1] = "" + ag.getMinSize();
 				agList[i][2] = "" + ag.getMaxSize();
 				String tmp = "";
-				if(ag.getAllowedClasses()!=null && ag.getAllowedClasses().isEmpty()){
+				if(ag.getAllowedClasses()!=null && ag.getAllowedClasses().getClassLevels().isEmpty()){
 					int n = 0;
-					for(int jahrg: ag.getAllowedClasses()){
-						tmp += jahrg + (n++<ag.getAllowedClasses().size() ? ", " : "");
+					for(int jahrg: ag.getAllowedClasses().getClassLevels()){
+						tmp += jahrg + (n++<ag.getAllowedClasses().getClassLevels().size() ? ", " : "");
 					}
 				}
 				else{

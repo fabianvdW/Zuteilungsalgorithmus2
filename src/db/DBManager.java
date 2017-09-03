@@ -208,6 +208,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import algorithm.Distributionalgorithm;
+import data.ClassLevel;
 import data.Participant;
 import data.Project;
 import data.Rating;
@@ -393,7 +394,7 @@ public class DBManager {
                 }
             }
             if (!contains) {
-                if (ag.getAllowedClasses().contains(jahrgang)) {
+                if (ag.getAllowedClasses().getClassLevels().contains(jahrgang)) {
                     rating.add(new Rating(ag, -3));
                 }
             }
@@ -560,7 +561,9 @@ public class DBManager {
         if (jahrgang.size() == 0) {
             classlevel = true;
         }
-        Project project= new Project(jahrgang,name,minAnzahl,maxAnzahl);
+        ArrayList<Participant> participants= new ArrayList<Participant>();
+        ClassLevel c  = new ClassLevel(0,jahrgang,participants);
+        Project project= new Project(c,name,minAnzahl,maxAnzahl);
         for(Participant particpant: teilnehmer){
             project.addParticipant(particpant);
         }
