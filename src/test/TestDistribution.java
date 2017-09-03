@@ -79,8 +79,9 @@ public class TestDistribution {
         ArrayList<Project> projects= new ArrayList<Project>();
         int size=0;
         int averageSizeOfClass=amountOfParticipants/amountOfProjects;
-        for(int i=0;i<amountOfProjects-1;i++){
+        while(size<amountOfParticipants*1.05){
             int maxSize=(int)(averageSizeOfClass*(1+(Math.random()*0.2-0.1)));
+            size+=maxSize;
             int minSize=(int)(maxSize*(Math.random()*0.2+0.3));
             //TODO do this shit with classlevels
             ArrayList<Integer> classLevels= new ArrayList<Integer>();
