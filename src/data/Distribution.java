@@ -221,7 +221,7 @@ public class Distribution {
         return score;
     }
     /**
-     *
+     * Method checks whether its possible to distribute the participants in the dataset to the projects in the dataset
      * @return true if there is enough space for all participants in projects
      */
     public boolean isValid(){
@@ -231,7 +231,7 @@ public class Distribution {
         for(Project p: this.projects){
             amtSpace+=p.getMaxSize();
         }
-        return amtSpace>=amtParticipants;
+        return (amtSpace>=amtParticipants);
     }
 
     /**
