@@ -464,7 +464,7 @@ public class Distribution {
         for(ClassLevel c: summarizedClasses){
             for(Integer i: c.classLevel){
                 if(p.getAllowedClasses().getClassLevels().contains(i)){
-                    p.
+
                 }
             }
         }

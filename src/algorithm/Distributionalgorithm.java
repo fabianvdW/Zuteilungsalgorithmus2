@@ -112,7 +112,7 @@ public class Distributionalgorithm {
      * @return true if able to join and false if not able to join
      */
     public static boolean isParticipantAllowedOnProject(Participant participant, Project project) {
-        return(project.getAllowedClasses().contains(participant.getClassLevel()) && !project.isFull()&& !project.getParticipants().contains(participant));
+        return(project.getAllowedClasses().getClassLevels().contains(participant.getClassLevel()) && !project.isFull()&& !project.getParticipants().contains(participant));
     }
 
     /**

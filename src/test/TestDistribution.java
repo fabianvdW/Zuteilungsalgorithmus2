@@ -1,10 +1,7 @@
 package test;
 
 import algorithm.Distributionalgorithm;
-import data.Distribution;
-import data.Participant;
-import data.Project;
-import data.Rating;
+import data.*;
 
 import java.util.ArrayList;
 
@@ -88,7 +85,9 @@ public class TestDistribution {
             for(int k=0;k<amountOfClassLevels;k++){
                 classLevels.add(k);
             }
-            Project p= new Project(classLevels,minSize,maxSize);
+            ArrayList<Participant> participantArrayList= new ArrayList<Participant>();
+            ClassLevel c= new ClassLevel(0,classLevels,participantArrayList);
+            Project p= new Project(c,minSize,maxSize);
             projects.add(p);
         }
         return projects;
